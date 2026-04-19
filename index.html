@@ -851,143 +851,149 @@ function formatMoney(amount) {
             return `Document signé électroniquement\n${getDocumentTitle()}\nN°: ${docNum}\nDate: ${formatDate(date)}\nClient: ${client}\nSociété: ${company}\nSite: nstcisecure.netlify.app`;
         }
         
-        function updatePreview() {
-            const company = companyNameInput?.value || "NOVA Startup Technologie CI";
-            const companyAddr = companyAddressInput?.value || "KORHOGO, Côte d'Ivoire<br>Tél: 0554101873<br>Site: nstcisecure.netlify.app";
-            const client = clientNameInput?.value || "";
-            const clientAddr = clientAddressInput?.value || "";
-            const docNumber = docNumberInput?.value || "";
-            const docDate = docDateInput?.value || "";
-            const due = dueDateInput?.value || "";
-            const footerNote = footerNotesInput?.value || "";
-            
-            let subTotal = 0;
-            const rows = items.map(item => {
-                const qty = item.quantity || 0;
-                const price = item.unitPrice || 0;
-                const total = qty * price;
-                subTotal += total;
-                return `<tr><td style="padding: 8px;">${escapeHtml(item.description || '---')}</td><td class="text-right">${qty}</td><td class="text-right">${formatMoney(price)}</td><td class="text-right">${formatMoney(total)}</td></tr>`;
-            }).join('');
+       
 
-
-
-
-             // Récupérer le taux TVA personnalisé
-    let tvaRate = parseFloat(document.getElementById('tvaRate')?.value) || 18;
-    tvaRate = tvaRate / 100; // Convertir en décimal (ex: 18 -> 0.18)
+function updatePreview() {
+    const company = companyNameInput?.value || "NOVA Startup Technologie CI";
+    const companyAddr = companyAddressInput?.value || "KORHOGO, Côte d'Ivoire<br>Tél: 0554101873<br>Site: nstcisecure.netlify.app";
+    const client = clientNameInput?.value || "";
+    const clientAddr = clientAddressInput?.value || "";
+    const docNumber = docNumberInput?.value || "";
+    const docDate = docDateInput?.value || "";
+    const due = dueDateInput?.value || "";
+    const footerNote = footerNotesInput?.value || "";
+    
+    // Récupérer le taux TVA depuis le champ (créer le champ si pas encore existant)
+    let tvaRateValue = 18; // valeur par défaut
+    let tvaTypeText = "TVA";
+    
+    const tvaRateInput = document.getElementById('tvaRate');
+    const tvaTypeSelect = document.getElementById('tvaType');
+    
+    if(tvaRateInput) {
+        tvaRateValue = parseFloat(tvaRateInput.value) || 18;
+    }
+    if(tvaTypeSelect) {
+        tvaTypeText = tvaTypeSelect.options[tvaTypeSelect.selectedIndex]?.text || "TVA";
+    }
+    
+    const tvaRate = tvaRateValue / 100;
+    
+    let subTotal = 0;
+    const rows = items.map(item => {
+        const qty = item.quantity || 0;
+        const price = item.unitPrice || 0;
+        const total = qty * price;
+        subTotal += total;
+        return `<tr><td style="padding: 8px;">${escapeHtml(item.description || '---')}</td><td class="text-right">${qty}</td><td class="text-right">${formatMoney(price)}</td><td class="text-right">${formatMoney(total)}</td></tr>`;
+    }).join('');
     
     const tvaAmount = subTotal * tvaRate;
     const grandTotal = subTotal + tvaAmount;
+    
+    let footerMessage = "";
+    if(currentDocType === 'quote') footerMessage = "Devis valable 30 jours. Signature pour acceptation.";
+    else if(currentDocType === 'proforma') footerMessage = "Facture proforma sans valeur fiscale - Document commercial";
+    else footerMessage = "Facture acquittée - Merci de votre règlement";
+    
+    const signatureData = generateQRCode();
+    const qrId = 'qr_' + Date.now();
+    
+    const html = `
+        <div class="invoice" id="realInvoiceContent">
+            <div class="invoice-header">
+                <div>
+                    <h2>${escapeHtml(company)}</h2>
+                    <div style="font-size:0.85rem; white-space:pre-line;">${escapeHtml(companyAddr)}</div>
+                </div>
+                <div class="invoice-title">
+                    <h3>${getDocumentTitle()}</h3>
+                    <div>N° ${escapeHtml(docNumber)}</div>
+                    ${getStatusBadge()}
+                </div>
+            </div>
+            <div class="client-section">
+                <div><strong>Facturer à :</strong><br>${escapeHtml(client) || '—'}<br>${escapeHtml(clientAddr) || '—'}</div>
+                <div><strong>Date :</strong> ${formatDate(docDate)}<br>${due ? `<strong>Échéance :</strong> ${formatDate(due)}` : ''}</div>
+            </div>
             
-            // const tvaAmount = subTotal * 0.20;
-            // const grandTotal = subTotal + tvaAmount;
+            <table class="items">
+                <thead><tr><th>Désignation</th><th class="text-right">Qté</th><th class="text-right">Prix HT</th><th class="text-right">Total HT</th></thead>
+                <tbody>${rows || '<tr><td colspan="4" style="text-align:center;">Aucun article</td></tr>'}</tbody>
+            </table>
             
-            let footerMessage = "";
-            if(currentDocType === 'quote') footerMessage = "Devis valable 30 jours. Signature pour acceptation.";
-            else if(currentDocType === 'proforma') footerMessage = "Facture proforma sans valeur fiscale - Document commercial";
-            else footerMessage = "Facture acquittée - Merci de votre règlement";
+            <div class="totals">
+                <table>
+                    <tr><td style="width:70%">Sous-total HT :</td><td class="text-right">${formatMoney(subTotal)}</td></tr>
+                    <tr><td>${tvaTypeText} (${tvaRateValue}%) :</td><td class="text-right">${formatMoney(tvaAmount)}</td></tr>
+                    <tr class="grand-total"><td><strong>Total TTC</strong> :</td><td class="text-right"><strong>${formatMoney(grandTotal)}</strong></td></tr>
+                </table>
+            </div>
             
-            const signatureData = generateQRCode();
-            const qrId = 'qr_' + Date.now();
-            
-            const html = `
-                <div class="invoice" id="realInvoiceContent">
-                    <div class="invoice-header">
-                        <div>
-                            <h2>${escapeHtml(company)}</h2>
-                            <div style="font-size:0.85rem; white-space:pre-line;">${escapeHtml(companyAddr)}</div>
+            <!-- SECTION PAIEMENT -->
+            <div class="payment-section-invoice">
+                <h4>PAIEMENT</h4>
+                <div class="payment-methods-invoice">
+                    <div class="cash-item">Paiement en espèces accepté</div>
+                    <div class="mobile-item-invoice">
+                        <strong>Mobile Banking</strong> - Compte: <strong>Coulibaly D L</strong>
+                        <div class="numbers-list">
+                            <span>Wave: +225 05 54 10 18 73</span>
+                            <span>MTN: +225 05 54 10 18 73</span>
+                            <span>Orange: +225 07 16 85 15 25</span>
+                            <span>Trésor Money: +225 05 54 10 18 73</span>
                         </div>
-                        <div class="invoice-title">
-                            <h3>${getDocumentTitle()}</h3>
-                            <div>N° ${escapeHtml(docNumber)}</div>
-                            ${getStatusBadge()}
-                        </div>
-                    </div>
-                    <div class="client-section">
-                        <div><strong>Facturer à :</strong><br>${escapeHtml(client) || '—'}<br>${escapeHtml(clientAddr) || '—'}</div>
-                        <div><strong>Date :</strong> ${formatDate(docDate)}<br>${due ? `<strong>Échéance :</strong> ${formatDate(due)}` : ''}</div>
-                    </div>
-                    
-                    <table class="items">
-                        <thead><tr><th>Désignation</th><th class="text-right">Qté</th><th class="text-right">Prix HT</th><th class="text-right">Total HT</th></tr></thead>
-                        <tbody>${rows || '<tr><td colspan="4" style="text-align:center;">Aucun article</td></tr>'}</tbody>
-                    </table>
-                    
-                    <div class="totals">
-                        <table>
-                            <tr><td style="width:70%">Sous-total HT :</td><td class="text-right">${formatMoney(subTotal)}</td></tr>
-                            
-                           <tr>
-    <td>${tvaTypeText} (${tvaRateValue}%) :</td>
-    <td class="text-right">${formatMoney(tvaAmount)}</td>
-</tr>     
-                            
-                            <tr class="grand-total"><td><strong>Total TTC</strong> :</td><td class="text-right"><strong>${formatMoney(grandTotal)}</strong></td></tr>
-                        </table>
-                    </div>
-                    
-                    <!-- SECTION PAIEMENT -->
-                    <div class="payment-section-invoice">
-                        <h4>PAIEMENT</h4>
-                        <div class="payment-methods-invoice">
-                            <div class="cash-item">Paiement en espèces accepté</div>
-                            <div class="mobile-item-invoice">
-                                <strong> Mobile Banking</strong> - Compte: <strong>Coulibaly D L</strong>
-                                <div class="numbers-list">
-                                    <span>Wave: +225 05 54 10 18 73</span>
-                                    <span>MTN: +225 05 54 10 18 73</span>
-                                    <span>Orange: +225 07 16 85 15 25</span>
-                                    <span>Trésor Money: +225 05 54 10 18 73</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- SECTION INCLUSIONS -->
-                    <div class="inclusions-section-invoice">
-                        <h4>VOTRE INSTALLATION INCLUT GRATUITEMENT :</h4>
-                        <ul>
-                            <li>✓ Protocole de sécurité personnalisé</li>
-                            <li>✓ Formation des utilisateurs</li>
-                            <li>✓ Maintenance préventive 6 mois</li>
-                        </ul>
-                    </div>
-                    
-                    <!-- SECTION ENGAGEMENT -->
-                    <div class="engagement-section-invoice">
-                        <h4>NOTRE ENGAGEMENT :</h4>
-                        <ul>
-                            <li>• Matériel homologué et certifié</li>
-                            <li>• Installation par techniciens certifiés</li>
-                            <li>• Tests complets avant remise</li>
-                            <li>• Dépannage sous 24h (7j/7j)</li>
-                            <li>• Garantie de l'équipement 1 mois</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="footer-note">${escapeHtml(footerNote || footerMessage)}<br><small>Généré par NOVA FACT - nstcisecure.netlify.app</small></div>
-                    
-                    <div class="signature-qr">
-                        <p>Signature électronique - Scan pour vérifier l'authenticité</p>
-                        <div id="${qrId}" class="qr-container"></div>
-                        <p style="font-size:0.65rem; margin-top:5px;">Document signé numériquement</p>
                     </div>
                 </div>
-            `;
+            </div>
             
-            if(previewArea) {
-                previewArea.innerHTML = html;
-                setTimeout(() => {
-                    const qrDiv = document.getElementById(qrId);
-                    if(qrDiv && typeof QRCode !== 'undefined') {
-                        qrDiv.innerHTML = '';
-                        new QRCode(qrDiv, { text: signatureData, width: 100, height: 100 });
-                    }
-                }, 50);
+            <!-- SECTION INCLUSIONS -->
+            <div class="inclusions-section-invoice">
+                <h4>VOTRE INSTALLATION INCLUT GRATUITEMENT :</h4>
+                <ul>
+                    <li>✓ Protocole de sécurité personnalisé</li>
+                    <li>✓ Formation des utilisateurs</li>
+                    <li>✓ Maintenance préventive 6 mois</li>
+                </ul>
+            </div>
+            
+            <!-- SECTION ENGAGEMENT -->
+            <div class="engagement-section-invoice">
+                <h4>NOTRE ENGAGEMENT :</h4>
+                <ul>
+                    <li>• Matériel homologué et certifié</li>
+                    <li>• Installation par techniciens certifiés</li>
+                    <li>• Tests complets avant remise</li>
+                    <li>• Dépannage sous 24h (7j/7j)</li>
+                    <li>• Garantie de l'équipement 1 mois</li>
+                </ul>
+            </div>
+            
+            <div class="footer-note">${escapeHtml(footerNote || footerMessage)}<br><small>Généré par NOVA FACT - nstcisecure.netlify.app</small></div>
+            
+            // <div class="signature-qr">
+            //     <p>🔒 Signature électronique - Scan pour vérifier l'authenticité</p>
+            //     <div id="${qrId}" class="qr-container"></div>
+            //     <p style="font-size:0.65rem; margin-top:5px;">Document signé numériquement</p>
+            // </div>
+        </div>
+    `;
+    
+    if(previewArea) {
+        previewArea.innerHTML = html;
+        setTimeout(() => {
+            const qrDiv = document.getElementById(qrId);
+            if(qrDiv && typeof QRCode !== 'undefined') {
+                qrDiv.innerHTML = '';
+                new QRCode(qrDiv, { text: signatureData, width: 100, height: 100 });
             }
-        }
-        
+        }, 50);
+    }
+}
+
+
+
+
         function printDocument() {
             updatePreview();
             const printContent = document.getElementById('realInvoiceContent');
