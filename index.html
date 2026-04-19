@@ -632,29 +632,20 @@ Site: nstcisecure.netlify.app</textarea>
                         <input type="date" id="dueDate">
                     </div>
                     
-
-
-
-
-<div class="row-2cols">
-    <div class="form-group">
-        <label>TVA (%)</label>
-        <input type="number" id="tvaRate" step="0.1" value="18" placeholder="Taux TVA">
-    </div>
-    <div class="form-group">
-        <label>Type TVA</label>
-        <select id="tvaType">
-            <option value="normal">TVA normale</option>
-            <option value="reduite">TVA réduite</option>
-            <option value="exonere">Exonéré</option>
-        </select>
-    </div>
-</div>
-
-
-
-
-
+                    <div class="row-2cols">
+                        <div class="form-group">
+                            <label>TVA (%)</label>
+                            <input type="number" id="tvaRate" step="0.1" value="18" placeholder="Taux TVA">
+                        </div>
+                        <div class="form-group">
+                            <label>Type TVA</label>
+                            <select id="tvaType">
+                                <option value="TVA normale">TVA normale</option>
+                                <option value="TVA réduite">TVA réduite</option>
+                                <option value="Exonéré">Exonéré</option>
+                            </select>
+                        </div>
+                    </div>
 
                     <hr style="margin: 15px 0;">
                     <h3> Articles / Prestations</h3>
@@ -709,6 +700,7 @@ Site: nstcisecure.netlify.app</textarea>
         
         let companyNameInput, companyAddressInput, clientNameInput, clientAddressInput;
         let docNumberInput, docDateInput, dueDateInput, footerNotesInput;
+        let tvaRateInput, tvaTypeSelect;
         let itemsContainer, previewArea;
         
         function setDefaultDate() {
@@ -735,6 +727,8 @@ Site: nstcisecure.netlify.app</textarea>
             docDateInput = document.getElementById('docDate');
             dueDateInput = document.getElementById('dueDate');
             footerNotesInput = document.getElementById('footerNotes');
+            tvaRateInput = document.getElementById('tvaRate');
+            tvaTypeSelect = document.getElementById('tvaType');
             itemsContainer = document.getElementById('itemsContainer');
             previewArea = document.getElementById('invoicePreviewArea');
             
@@ -747,8 +741,9 @@ Site: nstcisecure.netlify.app</textarea>
                 updatePreview();
             });
             
-            const inputs = [companyNameInput, companyAddressInput, clientNameInput, clientAddressInput, docNumberInput, docDateInput, dueDateInput, footerNotesInput];
+            const inputs = [companyNameInput, companyAddressInput, clientNameInput, clientAddressInput, docNumberInput, docDateInput, dueDateInput, footerNotesInput, tvaRateInput, tvaTypeSelect];
             inputs.forEach(inp => { if(inp) inp.addEventListener('input', () => updatePreview()); });
+            if(tvaTypeSelect) tvaTypeSelect.addEventListener('change', () => updatePreview());
         }
         
         function renderItemsForm() {
@@ -800,13 +795,9 @@ Site: nstcisecure.netlify.app</textarea>
             });
         }
         
-//         function formatMoney(amount) {
-//     return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(amount) + ' F CFA';
-// }
-
-function formatMoney(amount) {
-    return new Intl.NumberFormat('fr-FR').format(amount) + ' F CFA';
-}
+        function formatMoney(amount) {
+            return new Intl.NumberFormat('fr-FR').format(amount) + ' F CFA';
+        }
         
         function formatDate(dateString) {
             if(!dateString) return 'Non définie';
@@ -851,144 +842,154 @@ function formatMoney(amount) {
             return `Document signé électroniquement\n${getDocumentTitle()}\nN°: ${docNum}\nDate: ${formatDate(date)}\nClient: ${client}\nSociété: ${company}\nSite: nstcisecure.netlify.app`;
         }
         
-       
+        function calculateTVA() {
+            // Récupérer le taux TVA (peut être 0 si exonéré)
+            let tvaRateValue = parseFloat(tvaRateInput?.value) || 0;
+            const tvaType = tvaTypeSelect?.value || "TVA normale";
+            
+            // Si le type est "Exonéré", on force le taux à 0
+            if(tvaType === "Exonéré") {
+                tvaRateValue = 0;
+            }
+            
+            return tvaRateValue;
+        }
 
-function updatePreview() {
-    const company = companyNameInput?.value || "NOVA Startup Technologie CI";
-    const companyAddr = companyAddressInput?.value || "KORHOGO, Côte d'Ivoire<br>Tél: 0554101873<br>Site: nstcisecure.netlify.app";
-    const client = clientNameInput?.value || "";
-    const clientAddr = clientAddressInput?.value || "";
-    const docNumber = docNumberInput?.value || "";
-    const docDate = docDateInput?.value || "";
-    const due = dueDateInput?.value || "";
-    const footerNote = footerNotesInput?.value || "";
-    
-    // Récupérer le taux TVA depuis le champ (créer le champ si pas encore existant)
-    let tvaRateValue = 18; // valeur par défaut
-    let tvaTypeText = "TVA";
-    
-    const tvaRateInput = document.getElementById('tvaRate');
-    const tvaTypeSelect = document.getElementById('tvaType');
-    
-    if(tvaRateInput) {
-        tvaRateValue = parseFloat(tvaRateInput.value) || 18;
-    }
-    if(tvaTypeSelect) {
-        tvaTypeText = tvaTypeSelect.options[tvaTypeSelect.selectedIndex]?.text || "TVA";
-    }
-    
-    const tvaRate = tvaRateValue / 100;
-    
-    let subTotal = 0;
-    const rows = items.map(item => {
-        const qty = item.quantity || 0;
-        const price = item.unitPrice || 0;
-        const total = qty * price;
-        subTotal += total;
-        return `<tr><td style="padding: 8px;">${escapeHtml(item.description || '---')}</td><td class="text-right">${qty}</td><td class="text-right">${formatMoney(price)}</td><td class="text-right">${formatMoney(total)}</td></tr>`;
-    }).join('');
-    
-    const tvaAmount = subTotal * tvaRate;
-    const grandTotal = subTotal + tvaAmount;
-    
-    let footerMessage = "";
-    if(currentDocType === 'quote') footerMessage = "Devis valable 30 jours. Signature pour acceptation.";
-    else if(currentDocType === 'proforma') footerMessage = "Facture proforma sans valeur fiscale - Document commercial";
-    else footerMessage = "Facture acquittée - Merci de votre règlement";
-    
-    const signatureData = generateQRCode();
-    const qrId = 'qr_' + Date.now();
-    
-    const html = `
-        <div class="invoice" id="realInvoiceContent">
-            <div class="invoice-header">
-                <div>
-                    <h2>${escapeHtml(company)}</h2>
-                    <div style="font-size:0.85rem; white-space:pre-line;">${escapeHtml(companyAddr)}</div>
-                </div>
-                <div class="invoice-title">
-                    <h3>${getDocumentTitle()}</h3>
-                    <div>N° ${escapeHtml(docNumber)}</div>
-                    ${getStatusBadge()}
-                </div>
-            </div>
-            <div class="client-section">
-                <div><strong>Facturer à :</strong><br>${escapeHtml(client) || '—'}<br>${escapeHtml(clientAddr) || '—'}</div>
-                <div><strong>Date :</strong> ${formatDate(docDate)}<br>${due ? `<strong>Échéance :</strong> ${formatDate(due)}` : ''}</div>
-            </div>
+        function updatePreview() {
+            const company = companyNameInput?.value || "NOVA Startup Technologie CI";
+            const companyAddr = companyAddressInput?.value || "KORHOGO, Côte d'Ivoire<br>Tél: 0554101873<br>Site: nstcisecure.netlify.app";
+            const client = clientNameInput?.value || "";
+            const clientAddr = clientAddressInput?.value || "";
+            const docNumber = docNumberInput?.value || "";
+            const docDate = docDateInput?.value || "";
+            const due = dueDateInput?.value || "";
+            const footerNote = footerNotesInput?.value || "";
             
-            <table class="items">
-                <thead><tr><th>Désignation</th><th class="text-right">Qté</th><th class="text-right">Prix HT</th><th class="text-right">Total HT</th></thead>
-                <tbody>${rows || '<tr><td colspan="4" style="text-align:center;">Aucun article</td></tr>'}</tbody>
-            </table>
+            // Calcul de la TVA avec la nouvelle fonction
+            const tvaRateValue = calculateTVA();
+            const tvaRate = tvaRateValue / 100;
+            const tvaTypeText = tvaTypeSelect?.value || "TVA normale";
             
-            <div class="totals">
-                <table>
-                    <tr><td style="width:70%">Sous-total HT :</td><td class="text-right">${formatMoney(subTotal)}</td></tr>
-                    <tr><td>${tvaTypeText} (${tvaRateValue}%) :</td><td class="text-right">${formatMoney(tvaAmount)}</td></tr>
-                    <tr class="grand-total"><td><strong>Total TTC</strong> :</td><td class="text-right"><strong>${formatMoney(grandTotal)}</strong></td></tr>
-                </table>
-            </div>
+            let subTotal = 0;
+            const rows = items.map(item => {
+                const qty = item.quantity || 0;
+                const price = item.unitPrice || 0;
+                const total = qty * price;
+                subTotal += total;
+                return `<tr><td style="padding: 8px;">${escapeHtml(item.description || '---')}</td><td class="text-right">${qty}</td><td class="text-right">${formatMoney(price)}</td><td class="text-right">${formatMoney(total)}</td></tr>`;
+            }).join('');
             
-            <!-- SECTION PAIEMENT -->
-            <div class="payment-section-invoice">
-                <h4>PAIEMENT</h4>
-                <div class="payment-methods-invoice">
-                    <div class="cash-item">Paiement en espèces accepté</div>
-                    <div class="mobile-item-invoice">
-                        <strong>Mobile Banking</strong> - Compte: <strong>Coulibaly D L</strong>
-                        <div class="numbers-list">
-                            <span>Wave: +225 05 54 10 18 73</span>
-                            <span>MTN: +225 05 54 10 18 73</span>
-                            <span>Orange: +225 07 16 85 15 25</span>
-                            <span>Trésor Money: +225 05 54 10 18 73</span>
+            const tvaAmount = subTotal * tvaRate;
+            const grandTotal = subTotal + tvaAmount;
+            
+            // Affichage conditionnel de la ligne TVA
+            let tvaLine = '';
+            if(tvaRateValue > 0) {
+                tvaLine = `<tr><td style="width:70%">${tvaTypeText} (${tvaRateValue}%) :</td><td class="text-right">${formatMoney(tvaAmount)}</td></tr>`;
+            } else if(tvaTypeText === "Exonéré") {
+                tvaLine = `<tr><td style="width:70%">Exonéré de TVA :</td><td class="text-right">0 F CFA</td></tr>`;
+            } else {
+                tvaLine = `<tr><td style="width:70%">TVA (0%) :</td><td class="text-right">0 F CFA</td></tr>`;
+            }
+            
+            let footerMessage = "";
+            if(currentDocType === 'quote') footerMessage = "Devis valable 30 jours. Signature pour acceptation.";
+            else if(currentDocType === 'proforma') footerMessage = "Facture proforma sans valeur fiscale - Document commercial";
+            else footerMessage = "Facture acquittée - Merci de votre règlement";
+            
+            const signatureData = generateQRCode();
+            const qrId = 'qr_' + Date.now();
+            
+            const html = `
+                <div class="invoice" id="realInvoiceContent">
+                    <div class="invoice-header">
+                        <div>
+                            <h2>${escapeHtml(company)}</h2>
+                            <div style="font-size:0.85rem; white-space:pre-line;">${escapeHtml(companyAddr)}</div>
+                        </div>
+                        <div class="invoice-title">
+                            <h3>${getDocumentTitle()}</h3>
+                            <div>N° ${escapeHtml(docNumber)}</div>
+                            ${getStatusBadge()}
                         </div>
                     </div>
+                    <div class="client-section">
+                        <div><strong>Facturer à :</strong><br>${escapeHtml(client) || '—'}<br>${escapeHtml(clientAddr) || '—'}</div>
+                        <div><strong>Date :</strong> ${formatDate(docDate)}<br>${due ? `<strong>Échéance :</strong> ${formatDate(due)}` : ''}</div>
+                    </div>
+                    
+                    <table class="items">
+                        <thead><tr><th>Désignation</th><th class="text-right">Qté</th><th class="text-right">Prix HT</th><th class="text-right">Total HT</th></thead>
+                        <tbody>${rows || '<tr><td colspan="4" style="text-align:center;">Aucun article</td></tr>'}</tbody>
+                    </table>
+                    
+                    <div class="totals">
+                        <table>
+                            <tr><td style="width:70%">Sous-total HT :</td><td class="text-right">${formatMoney(subTotal)}</td></tr>
+                            ${tvaLine}
+                            <tr class="grand-total"><td><strong>Total TTC</strong> :</td><td class="text-right"><strong>${formatMoney(grandTotal)}</strong></td></tr>
+                        </table>
+                    </div>
+                    
+                    <!-- SECTION PAIEMENT -->
+                    <div class="payment-section-invoice">
+                        <h4>PAIEMENT</h4>
+                        <div class="payment-methods-invoice">
+                            <div class="cash-item">Paiement en espèces accepté</div>
+                            <div class="mobile-item-invoice">
+                                <strong>Mobile Banking</strong> - Compte: <strong>Coulibaly D L</strong>
+                                <div class="numbers-list">
+                                    <span>Wave: +225 05 54 10 18 73</span>
+                                    <span>MTN: +225 05 54 10 18 73</span>
+                                    <span>Orange: +225 07 16 85 15 25</span>
+                                    <span>Trésor Money: +225 05 54 10 18 73</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- SECTION INCLUSIONS -->
+                    <div class="inclusions-section-invoice">
+                        <h4>VOTRE INSTALLATION INCLUT GRATUITEMENT :</h4>
+                        <ul>
+                            <li>✓ Protocole de sécurité personnalisé</li>
+                            <li>✓ Formation des utilisateurs</li>
+                            <li>✓ Maintenance préventive 6 mois</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- SECTION ENGAGEMENT -->
+                    <div class="engagement-section-invoice">
+                        <h4>NOTRE ENGAGEMENT :</h4>
+                        <ul>
+                            <li>• Matériel homologué et certifié</li>
+                            <li>• Installation par techniciens certifiés</li>
+                            <li>• Tests complets avant remise</li>
+                            <li>• Dépannage sous 24h (7j/7j)</li>
+                            <li>• Garantie de l'équipement 1 mois</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-note">${escapeHtml(footerNote || footerMessage)}<br><small>Généré par NOVA FACT - nstcisecure.netlify.app</small></div>
+                    
+                    <div class="signature-qr">
+                        <div class="qr-container" id="${qrId}"></div>
+                        <div style="font-size:0.7rem; margin-top:8px;">Document certifié</div>
+                    </div>
                 </div>
-            </div>
+            `;
             
-            <!-- SECTION INCLUSIONS -->
-            <div class="inclusions-section-invoice">
-                <h4>VOTRE INSTALLATION INCLUT GRATUITEMENT :</h4>
-                <ul>
-                    <li>✓ Protocole de sécurité personnalisé</li>
-                    <li>✓ Formation des utilisateurs</li>
-                    <li>✓ Maintenance préventive 6 mois</li>
-                </ul>
-            </div>
-            
-            <!-- SECTION ENGAGEMENT -->
-            <div class="engagement-section-invoice">
-                <h4>NOTRE ENGAGEMENT :</h4>
-                <ul>
-                    <li>• Matériel homologué et certifié</li>
-                    <li>• Installation par techniciens certifiés</li>
-                    <li>• Tests complets avant remise</li>
-                    <li>• Dépannage sous 24h (7j/7j)</li>
-                    <li>• Garantie de l'équipement 1 mois</li>
-                </ul>
-            </div>
-            
-            <div class="footer-note">${escapeHtml(footerNote || footerMessage)}<br><small>Généré par NOVA FACT - nstcisecure.netlify.app</small></div>
-            
-             
-        </div>
-    `;
-    
-    if(previewArea) {
-        previewArea.innerHTML = html;
-        setTimeout(() => {
-            const qrDiv = document.getElementById(qrId);
-            if(qrDiv && typeof QRCode !== 'undefined') {
-                qrDiv.innerHTML = '';
-                new QRCode(qrDiv, { text: signatureData, width: 100, height: 100 });
+            if(previewArea) {
+                previewArea.innerHTML = html;
+                setTimeout(() => {
+                    const qrDiv = document.getElementById(qrId);
+                    if(qrDiv && typeof QRCode !== 'undefined') {
+                        qrDiv.innerHTML = '';
+                        new QRCode(qrDiv, { text: signatureData, width: 100, height: 100 });
+                    }
+                }, 50);
             }
-        }, 50);
-    }
-}
-
-
-
+        }
 
         function printDocument() {
             updatePreview();
@@ -1055,6 +1056,8 @@ function updatePreview() {
             dueDateInput.value = due.toISOString().slice(0,10);
             docNumberInput.value = generateDocumentNumber(currentDocType);
             incrementCounter(currentDocType);
+            if(tvaRateInput) tvaRateInput.value = "18";
+            if(tvaTypeSelect) tvaTypeSelect.value = "TVA normale";
             updatePreview();
         }
         
