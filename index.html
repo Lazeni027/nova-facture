@@ -626,37 +626,36 @@ Site: nstcisecure.netlify.app</textarea>
                             <label>Date</label>
                             <input type="date" id="docDate">
                         </div>
-      
                     </div>
                     <div class="form-group">
                         <label>Date d'échéance / Validité</label>
                         <input type="date" id="dueDate">
                     </div>
+                    
 
 
-<!-- AJOUTEZ LES CHAMPS TVA ICI, APRÈS LA DATE D'ÉCHÉANCE -->
-    <div class="row-2cols">
-        <div class="form-group">
-            <label>TVA (%)</label>
-            <input type="number" id="tvaRate" step="0.1" value="18" placeholder="Taux TVA">
-        </div>
-        <div class="form-group">
-            <label>Type TVA</label>
-            <select id="tvaType">
-                <option value="18">Standard (18%)</option>
-                <option value="10">Réduit (10%)</option>
-                <option value="0">Exonéré (0%)</option>
-            </select>
-        </div>
+
+
+<div class="row-2cols">
+    <div class="form-group">
+        <label>TVA (%)</label>
+        <input type="number" id="tvaRate" step="0.1" value="18" placeholder="Taux TVA">
     </div>
-    
-   
+    <div class="form-group">
+        <label>Type TVA</label>
+        <select id="tvaType">
+            <option value="normal">TVA normale</option>
+            <option value="reduite">TVA réduite</option>
+            <option value="exonere">Exonéré</option>
+        </select>
+    </div>
+</div>
 
 
-                  
 
-                    
-                    
+
+
+
                     <hr style="margin: 15px 0;">
                     <h3> Articles / Prestations</h3>
                     <div id="itemsContainer"></div>
@@ -801,9 +800,12 @@ Site: nstcisecure.netlify.app</textarea>
             });
         }
         
-       function formatMoney(amount) {
+//         function formatMoney(amount) {
+//     return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(amount) + ' F CFA';
+// }
+
+function formatMoney(amount) {
     return new Intl.NumberFormat('fr-FR').format(amount) + ' F CFA';
-}
 }
         
         function formatDate(dateString) {
@@ -867,20 +869,20 @@ Site: nstcisecure.netlify.app</textarea>
                 subTotal += total;
                 return `<tr><td style="padding: 8px;">${escapeHtml(item.description || '---')}</td><td class="text-right">${qty}</td><td class="text-right">${formatMoney(price)}</td><td class="text-right">${formatMoney(total)}</td></tr>`;
             }).join('');
+
+
+
+
+             // Récupérer le taux TVA personnalisé
+    let tvaRate = parseFloat(document.getElementById('tvaRate')?.value) || 18;
+    tvaRate = tvaRate / 100; // Convertir en décimal (ex: 18 -> 0.18)
+    
+    const tvaAmount = subTotal * tvaRate;
+    const grandTotal = subTotal + tvaAmount;
             
             // const tvaAmount = subTotal * 0.20;
             // const grandTotal = subTotal + tvaAmount;
             
-
-// Récupérer le taux TVA depuis le champ
-let tvaRateValue = parseFloat(document.getElementById('tvaRate')?.value) || 18;
-let tvaTypeText = document.getElementById('tvaType')?.options[document.getElementById('tvaType')?.selectedIndex]?.text || 'TVA';
-const tvaRate = tvaRateValue / 100;
-const tvaAmount = subTotal * tvaRate;
-const grandTotal = subTotal + tvaAmount;
-
-
-
             let footerMessage = "";
             if(currentDocType === 'quote') footerMessage = "Devis valable 30 jours. Signature pour acceptation.";
             else if(currentDocType === 'proforma') footerMessage = "Facture proforma sans valeur fiscale - Document commercial";
@@ -916,13 +918,12 @@ const grandTotal = subTotal + tvaAmount;
                         <table>
                             <tr><td style="width:70%">Sous-total HT :</td><td class="text-right">${formatMoney(subTotal)}</td></tr>
                             // <tr><td>TVA (20%) :</td><td class="text-right">${formatMoney(tvaAmount)}</td></tr>
-
-<tr>
-    <td>${tvaTypeText} (${tvaRateValue}%) :</td>
-    <td class="text-right">${formatMoney(tvaAmount)}</td>
-</tr>
-
-
+                             <tr>
+        <td>TVA (${tvaRate * 100}%) :</td>
+        <td class="text-right">${formatMoney(tvaAmount)}</td>
+    </tr>
+                            
+                            
                             <tr class="grand-total"><td><strong>Total TTC</strong> :</td><td class="text-right"><strong>${formatMoney(grandTotal)}</strong></td></tr>
                         </table>
                     </div>
