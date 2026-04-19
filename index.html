@@ -777,8 +777,8 @@ Site: nstcisecure.netlify.app</textarea>
         }
         
         function formatMoney(amount) {
-            return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount);
-        }
+    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(amount) + ' F CFA';
+}
         
         function formatDate(dateString) {
             if(!dateString) return 'Non définie';
