@@ -2,9 +2,11 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, print-scale: 100%, user-scalable=yes">
-    <title>NOVA FACT - Factures & Devis Professionnel</title>
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Gestion Pro - Devis, Facture Proforma & Facture | COULIBALY IMPORT EXPORT</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -13,1086 +15,891 @@
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            min-height: 100vh;
+            background: #f0f2f5;
+            font-family: 'Inter', sans-serif;
+            padding: 30px 20px;
+            color: #1e293b;
         }
 
-        /* Page Login */
-        .login-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .login-card {
-            background: white;
-            border-radius: 32px;
-            padding: 40px;
-            width: 100%;
-            max-width: 420px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3);
-            animation: fadeInUp 0.5s ease;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .login-card h2 {
-            font-size: 2rem;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 10px;
-        }
-
-        .login-card .logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .login-card .logo span {
-            font-size: 3rem;
-        }
-
-        .error-msg {
-            background: #fee2e2;
-            color: #dc2626;
-            padding: 10px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            font-size: 0.85rem;
-            display: none;
-        }
-
-        /* Main App */
-        .app-main {
-            display: none;
+        .app-container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
         }
 
-        /* Menu Responsive */
-        .menu-bar {
-            background: white;
-            border-radius: 20px;
-            padding: 12px 24px;
-            margin-bottom: 24px;
+        .main-header {
             display: flex;
-            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
             gap: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px 28px;
+            border-radius: 28px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.02), 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e9eef3;
         }
-
-        .menu-logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+        .logo-area h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            letter-spacing: -0.3px;
         }
-
-        .menu-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+        .company-info {
+            font-size: 0.75rem;
+            color: #5b6e8c;
+            margin-top: 5px;
+            line-height: 1.4;
         }
-
-        .menu-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: #f3f4f6;
-            color: #374151;
+        .company-info i {
+            width: 18px;
+            color: #2a5298;
         }
-
-        .menu-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-
-        .logout-btn {
-            background: #ef4444;
-            color: white;
-        }
-
-        .logout-btn:hover {
-            background: #dc2626;
-        }
-
-        /* Workspace */
-        .workspace {
-            background: white;
-            border-radius: 24px;
-            padding: 24px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        }
-
-        .document-type {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #e5e7eb;
-        }
-
-        .type-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: #f3f4f6;
-            color: #4b5563;
-        }
-
-        .type-btn.active {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-        }
-
-        /* 2 colonnes */
-        .two-columns {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 24px;
-        }
-
-        .form-section {
-            flex: 1;
-            min-width: 280px;
-        }
-
-        .invoice-preview {
-            flex: 1.2;
-            min-width: 320px;
-            background: #faf9fe;
-            border-radius: 20px;
-            padding: 20px;
-            overflow-x: auto;
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        label {
-            display: block;
-            font-weight: 600;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #4b5563;
-            margin-bottom: 6px;
-        }
-
-        input, textarea, select {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1px solid #d1d5db;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            transition: 0.2s;
-            font-family: inherit;
-        }
-
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
-        }
-
-        .row-2cols {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .row-2cols > div {
-            flex: 1;
-            min-width: 120px;
-        }
-
-        .item-line {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-
-        .item-line input {
-            flex: 2;
-            min-width: 100px;
-        }
-
-        .item-line input.qty, .item-line input.price {
-            flex: 0.7;
-            min-width: 70px;
-        }
-
-        .item-line button {
-            background: #ef4444;
-            border: none;
-            color: white;
-            width: 34px;
-            height: 34px;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .add-item-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border: none;
-            padding: 10px 18px;
-            border-radius: 40px;
-            font-weight: 500;
-            margin-top: 8px;
-            cursor: pointer;
-            color: white;
-        }
-
         .action-buttons {
             display: flex;
             gap: 12px;
-            margin-top: 20px;
             flex-wrap: wrap;
         }
-
-        .btn-action {
-            padding: 10px 20px;
+        .btn {
             border: none;
+            background: white;
+            padding: 10px 20px;
             border-radius: 40px;
             font-weight: 600;
+            font-size: 0.9rem;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            border: 1px solid #cfdfed;
         }
-
         .btn-primary {
-            background: #10b981;
+            background: #1e3c72;
+            border-color: #1e3c72;
             color: white;
+            box-shadow: 0 4px 8px rgba(30,60,114,0.2);
         }
-
-        /* Style facture */
-        .invoice {
+        .btn-primary:hover {
+            background: #0f2b4f;
+            transform: translateY(-2px);
+        }
+        .btn-outline {
+            border-color: #cbdce9;
             background: white;
-            padding: 25px;
-            border-radius: 16px;
-            font-family: 'Segoe UI', system-ui;
         }
-
-        .invoice-header {
+        .btn-outline:hover {
+            background: #f8fafc;
+            border-color: #8ba0bc;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 28px;
+        }
+        @media (max-width: 900px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+        }
+        .card {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.05);
+            border: 1px solid #eef2f8;
+            overflow: hidden;
+        }
+        .card-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid #eef2f8;
+            background: #fefefe;
+            font-weight: 700;
+            font-size: 1.25rem;
             display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            margin-bottom: 25px;
-            border-bottom: 2px solid #e5e7eb;
-            padding-bottom: 20px;
+            align-items: center;
+            gap: 12px;
         }
-
-        .invoice-title h3 {
-            font-size: 1.8rem;
-            color: #667eea;
+        .card-header i {
+            color: #2a5298;
+            font-size: 1.3rem;
         }
-
-        .client-section {
-            background: #f9fafb;
-            padding: 15px;
-            border-radius: 16px;
-            margin-bottom: 25px;
+        .card-body {
+            padding: 24px;
+        }
+        .form-row {
             display: flex;
-            justify-content: space-between;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 16px;
+            margin-bottom: 20px;
         }
-
-        table.items {
+        .form-group {
+            flex: 1;
+            min-width: 140px;
+        }
+        label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: #54708f;
+            display: block;
+            margin-bottom: 6px;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 16px;
+            border: 1.5px solid #e2e8f0;
+            font-family: 'Inter', monospace;
+            font-size: 0.9rem;
+            transition: 0.2s;
+            background: white;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42,82,152,0.15);
+        }
+        .items-table {
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
         }
-
-        table.items th {
-            background: #f3f4f6;
-            padding: 12px;
+        .items-table th, .items-table td {
+            padding: 12px 6px;
             text-align: left;
+            border-bottom: 1px solid #ecf3f9;
+            vertical-align: middle;
         }
-
-        table.items td {
-            padding: 10px;
-            border-bottom: 1px solid #e5e7eb;
+        .items-table th {
+            font-weight: 600;
+            color: #2c3e66;
+            font-size: 0.8rem;
         }
-
-        .text-right {
-            text-align: right;
+        .item-qty, .item-price {
+            width: 90px;
         }
-
+        .item-delete {
+            width: 40px;
+            text-align: center;
+            cursor: pointer;
+            color: #a0bbd9;
+        }
+        .item-delete:hover {
+            color: #e11d48;
+        }
+        .add-item-btn {
+            background: #eff3f8;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 30px;
+            font-weight: 500;
+            margin-top: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
         .totals {
-            text-align: right;
-            margin-top: 20px;
-        }
-
-        .totals table {
-            width: 100%;
-            max-width: 300px;
-            margin-left: auto;
-        }
-
-        .grand-total {
-            font-weight: bold;
-            font-size: 1.2rem;
-            border-top: 2px solid #d1d5db;
-        }
-
-        .footer-note {
-            margin-top: 25px;
-            font-size: 0.75rem;
-            text-align: center;
-            color: #6b7280;
-            border-top: 1px solid #e5e7eb;
-            padding-top: 15px;
-        }
-
-        .signature-qr {
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px dashed #d1d5db;
-            text-align: center;
-        }
-
-        .qr-container {
-            display: inline-block;
-            padding: 10px;
-            background: white;
-            border-radius: 12px;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
+            background: #f9fcff;
             border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: bold;
+            padding: 16px 20px;
+            margin-top: 20px;
+            text-align: right;
         }
-
-        .status-proforma { background: #fef3c7; color: #92400e; }
-        .status-paid { background: #d1fae5; color: #065f46; }
-        .status-quote { background: #dbeafe; color: #1e40af; }
-
-        /* Sections sur la facture */
-        .payment-section-invoice {
-            background: #f0fdf4;
-            border-radius: 12px;
-            padding: 15px;
-            margin: 20px 0 15px 0;
-            border-left: 4px solid #10b981;
+        .totals p {
+            margin: 6px 0;
         }
-
-        .payment-section-invoice h4 {
-            color: #065f46;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
+        .grand-total {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #0f2b4f;
         }
-
-        .payment-methods-invoice {
+        .doc-preview {
+            background: #fefefe;
+            border-radius: 24px;
+            padding: 20px;
+            border: 1px solid #eef2fa;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .doc-header {
             display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
             justify-content: space-between;
-        }
-
-        .cash-item {
-            background: #fef3c7;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-        }
-
-        .mobile-item-invoice {
-            background: #dbeafe;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-        }
-
-        .numbers-list {
-            display: flex;
+            border-bottom: 2px dashed #cfdfed;
+            padding-bottom: 15px;
+            margin-bottom: 18px;
             flex-wrap: wrap;
-            gap: 10px;
+        }
+        .doc-infos {
+            font-size: 0.8rem;
+            color: #3d5a78;
+        }
+        .preview-table {
+            width: 100%;
+            font-size: 0.85rem;
+            border-collapse: collapse;
+        }
+        .preview-table th, .preview-table td {
+            padding: 10px 5px;
+            border-bottom: 1px solid #eef2f8;
+        }
+        .right {
+            text-align: right;
+        }
+        .total-preview {
+            margin-top: 16px;
+            text-align: right;
+            font-weight: 700;
+        }
+        .watermark-note {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 20px;
+            color: #96aec9;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.75rem;
+            color: #7e95b3;
+        }
+        button:active {
+            transform: scale(0.97);
+        }
+        .company-badge {
+            background: #f0f4fa;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 0.7rem;
             margin-top: 8px;
         }
-
-        .numbers-list span {
-            background: white;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-family: monospace;
+        .signature-area {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px dashed #cfdfed;
             font-size: 0.7rem;
-        }
-
-        .inclusions-section-invoice {
-            background: #f8fafc;
-            border-radius: 12px;
-            padding: 12px 15px;
-            margin: 15px 0;
-            border-left: 4px solid #3b82f6;
-        }
-
-        .inclusions-section-invoice h4 {
-            color: #1e40af;
-            margin-bottom: 8px;
-            font-size: 0.85rem;
-        }
-
-        .inclusions-section-invoice ul {
             display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            list-style: none;
-            padding: 0;
-        }
-
-        .inclusions-section-invoice li {
-            font-size: 0.75rem;
-            background: white;
-            padding: 4px 10px;
-            border-radius: 20px;
-        }
-
-        .engagement-section-invoice {
-            background: #fff7ed;
-            border-radius: 12px;
-            padding: 12px 15px;
-            margin: 15px 0;
-            border-left: 4px solid #f59e0b;
-        }
-
-        .engagement-section-invoice h4 {
-            color: #92400e;
-            margin-bottom: 8px;
-            font-size: 0.85rem;
-        }
-
-        .engagement-section-invoice ul {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            list-style: none;
-            padding: 0;
-        }
-
-        .engagement-section-invoice li {
-            font-size: 0.7rem;
-            background: white;
-            padding: 3px 10px;
-            border-radius: 15px;
-        }
-
-        @media print {
-            body {
-                background: white;
-            }
-            .menu-bar, .form-section, .action-buttons, .document-type, .type-btn, .logout-btn, .add-item-btn, .item-line button, .btn-action {
-                display: none !important;
-            }
-            .two-columns {
-                display: block;
-            }
-            .invoice-preview {
-                padding: 0;
-                background: white;
-            }
-            .workspace {
-                padding: 0;
-            }
-            .payment-section-invoice, 
-            .inclusions-section-invoice, 
-            .engagement-section-invoice {
-                break-inside: avoid;
-                page-break-inside: avoid;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .app-main {
-                padding: 10px;
-            }
-            .menu-bar {
-                flex-direction: column;
-            }
-            .invoice-title h3 {
-                font-size: 1.3rem;
-            }
+            justify-content: space-between;
+            color: #6b85a3;
         }
     </style>
 </head>
 <body>
-    <!-- Login Page -->
-    <div id="loginPage" class="login-container">
-        <div class="login-card">
-            <div class="logo">
-                <span>✨</span>
-                <h2>NOVA FACT</h2>
-                <p style="color: #6b7280;">Factures & Devis Professionnel</p>
+<div class="app-container">
+    <div class="main-header">
+        <div class="logo-area">
+            <h1><i class="fas fa-file-invoice-dollar"></i> ProSuite</h1>
+            <div class="company-info">
+                <div><i class="fas fa-building"></i> <strong>NOVA Startup TECH CI</strong></div>
+                <div><i class="fas fa-map-marker-alt"></i> Korhogo & Abidjan - Côte d'Ivoire</div>
+                <div><i class="fas fa-phone"></i> +225 05 54 10 18 73 | <i class="fas fa-envelope"></i>nstci2025@gmail.com</div>
+                
             </div>
-            <div id="loginError" class="error-msg"></div>
-            <div class="form-group">
-                <label>👤 Identifiant</label>
-                <input type="text" id="loginUsername" placeholder="NOVA" value="NOVA">
-            </div>
-            <div class="form-group">
-                <label>🔒 Mot de passe</label>
-                <input type="password" id="loginPassword" placeholder="admin2026">
-            </div>
-            <button class="btn-action btn-primary" style="width:100%; margin-top:20px;" onclick="handleLogin()">Connexion</button>
+        </div>
+        <div class="action-buttons">
+            <button id="createQuoteBtn" class="btn btn-primary"><i class="fas fa-file-signature"></i> Créer un Devis</button>
+            <button id="createProformaBtn" class="btn btn-primary" style="background:#2c5a2e; border-color:#2c5a2e;"><i class="fas fa-receipt"></i> Facture Proforma</button>
+            <button id="createInvoiceBtn" class="btn btn-primary" style="background:#9b2c2c; border-color:#9b2c2c;"><i class="fas fa-file-invoice"></i> Facture finale</button>
+            <button id="resetFormBtn" class="btn btn-outline"><i class="fas fa-eraser"></i> Nouveau document</button>
         </div>
     </div>
 
-    <!-- Main App -->
-    <div id="appMain" class="app-main">
-        <div class="menu-bar">
-            <div class="menu-logo">
-                <span>📊</span>
-                <span>NOVA FACT - Gestion Pro</span>
+    <div class="dashboard">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-pen-alt"></i> Détails du document
             </div>
-            <div class="menu-buttons">
-                <button class="menu-btn" onclick="resetToEmpty()">🔄 Tout effacer</button>
-                <button class="menu-btn logout-btn" onclick="logout()">🚪 Déconnexion</button>
-            </div>
-        </div>
-
-        <div class="workspace">
-            <div class="document-type">
-                <button class="type-btn active" onclick="setDocumentType('proforma')"> Facture Proforma</button>
-                <button class="type-btn" onclick="setDocumentType('paid')">✅ Facture (Payée)</button>
-                <button class="type-btn" onclick="setDocumentType('quote')"> Devis</button>
-            </div>
-
-            <div class="two-columns">
-                <!-- Formulaire -->
-                <div class="form-section">
-                    <h3 style="margin-bottom: 15px;">🏢 Informations société</h3>
+            <div class="card-body">
+                <div class="form-row">
                     <div class="form-group">
-                        <label>Nom société</label>
-                        <input type="text" id="companyName" placeholder="NOVA Startup Technologie CI" value="NOVA Startup Technologie CI">
+                        <label><i class="fas fa-hashtag"></i> N° Document</label>
+                        <input type="text" id="docNumber" placeholder="DEV-2025-001" value="DEV-001">
                     </div>
                     <div class="form-group">
-                        <label>Adresse & contact</label>
-                        <textarea id="companyAddress" rows="3" placeholder="Adresse complète, téléphone...">KORHOGO, Côte d'Ivoire
-Tél: 0554101873
-Site: nstcisecure.netlify.app</textarea>
-                    </div>
-                    
-                    <h3 style="margin: 20px 0 10px;">👤 Client</h3>
-                    <div class="form-group">
-                        <label>Nom / Société client</label>
-                        <input type="text" id="clientName" placeholder="Nom du client">
-                    </div>
-                    <div class="form-group">
-                        <label>Adresse client</label>
-                        <textarea id="clientAddress" rows="2" placeholder="Adresse du client"></textarea>
-                    </div>
-                    
-                    <div class="row-2cols">
-                        <div class="form-group">
-                            <label>N° Document</label>
-                            <input type="text" id="docNumber" placeholder="Saisissez un numéro ou laissez auto-généré">
-                        </div>
-                        <div class="form-group">
-                            <label>Date</label>
-                            <input type="date" id="docDate">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Date d'échéance / Validité</label>
-                        <input type="date" id="dueDate">
-                    </div>
-                    
-                    <div class="row-2cols">
-                        <div class="form-group">
-                            <label>TVA (%)</label>
-                            <input type="number" id="tvaRate" step="0.1" value="18" placeholder="Taux TVA">
-                        </div>
-                        <div class="form-group">
-                            <label>Type TVA</label>
-                            <select id="tvaType">
-                                <option value="TVA normale">TVA normale</option>
-                                <option value="TVA réduite">TVA réduite</option>
-                                <option value="Exonéré">Exonéré</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <hr style="margin: 15px 0;">
-                    <h3> Articles / Prestations</h3>
-                    <div id="itemsContainer"></div>
-                    <button type="button" class="add-item-btn" id="addItemBtn">+ Ajouter une ligne</button>
-                    
-                    <hr style="margin: 15px 0;">
-                    <div class="form-group">
-                        <label>Notes additionnelles</label>
-                        <textarea id="footerNotes" rows="2" placeholder="Conditions, remerciements..."></textarea>
-                    </div>
-                    
-                    <div class="action-buttons">
-                        <button class="btn-action btn-primary" onclick="printDocument()">🖨️ Imprimer / PDF</button>
+                        <label><i class="far fa-calendar-alt"></i> Date</label>
+                        <input type="date" id="docDate">
                     </div>
                 </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Client / Société</label>
+                        <input type="text" id="clientName" placeholder="Nom du client" value=" Nom du client ou société">
+                    </div>
+                    <div class="form-group">
+                        <label>Email & Client </label>
+                        <input type="email" id="clientEmail" placeholder="client@exemple.com" value="+225 0505050505">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Adresse / info complémentaire</label>
+                    <textarea rows="2" id="clientAddress" placeholder="Adresse, TVA, etc...">Korhogo / Abidjan, CI</textarea>
+                </div>
 
-                <!-- Aperçu facture -->
-                <div class="invoice-preview" id="invoicePreviewArea"></div>
+                <label><i class="fas fa-list-ul"></i> Articles / Prestations</label>
+                <table class="items-table" id="itemsEditorTable">
+                    <thead>
+                        <tr><th>Description</th><th>Qté</th><th>Prix unitaire HT (FCFA)</th><th>Total HT</th><th></th></tr>
+                    </thead>
+                    <tbody id="itemsBody"></tbody>
+                </table>
+                <button type="button" id="addItemBtn" class="add-item-btn"><i class="fas fa-plus-circle"></i> Ajouter une ligne</button>
+                
+                <div class="form-row" style="margin-top: 20px;">
+                    <div class="form-group">
+                        <label>Taux TVA (%)</label>
+                        <input type="number" id="taxRate" step="0.1" value="20">
+                    </div>
+                    <div class="form-group">
+                        <label>Remise (%)</label>
+                        <input type="number" id="discountRate" step="0.5" value="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Notes / Conditions</label>
+                    <textarea rows="2" id="notesField" placeholder="Paiement sous 30 jours, etc...">Paiement à réception - Merci de votre confiance</textarea>
+                </div>
+                <div class="totals">
+                    <p>Total HT : <strong id="totalHT">0.00 FCFA</strong></p>
+                    <p>TVA (<span id="taxPercentSpan">20</span>%) : <strong id="totalVAT">0.00 FCFA</strong></p>
+                    <p>Remise (<span id="discountSpan">0</span>%) : <strong id="totalDiscount">0.00 FCFA</strong></p>
+                    <p class="grand-total">TOTAL TTC : <span id="grandTotalSpan">0.00 FCFA</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <!-- <i class="fas fa-eye"></i> DOC NUMERIQUE -->
+                <span id="currentDocTypeLabel" style="font-size: 0.8rem; font-weight: normal; margin-left: auto;">(Devis)</span>
+            </div>
+            <div class="card-body doc-preview">
+                <div id="livePreview"></div>
+                <div style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 25px;">
+                    <button id="generatePdfBtn" class="btn btn-primary"><i class="fas fa-file-pdf"></i> Générer PDF</button>
+                </div>
+                <div class="watermark-note">
+                    <i class="fas fa-lock"></i> Aperçu en temps réel – Modifiable à tout moment
+                </div>
             </div>
         </div>
     </div>
+    <footer>
+        <i class="fas fa-calculator"></i> NOVA Startup TECH CI | 
+    </footer>
+</div>
 
-    <script>
-        // Compteurs automatiques
-        let counters = { proforma: 1, paid: 1, quote: 1 };
+<script>
+    let items = [
         
-        function loadCounters() {
-            const saved = localStorage.getItem('novaFactCounters');
-            if(saved) counters = JSON.parse(saved);
-        }
-        
-        function saveCounters() {
-            localStorage.setItem('novaFactCounters', JSON.stringify(counters));
-        }
-        
-        function generateDocumentNumber(type) {
-            const year = new Date().getFullYear();
-            const prefix = type === 'proforma' ? 'PF' : (type === 'paid' ? 'FA' : 'DEV');
-            const num = counters[type];
-            return `${prefix}-${year}-${String(num).padStart(4, '0')}`;
-        }
-        
-        function incrementCounter(type) {
-            counters[type]++;
-            saveCounters();
-        }
-        
-        let currentUser = null;
-        let currentDocType = 'proforma';
-        let items = [];
-        
-        let companyNameInput, companyAddressInput, clientNameInput, clientAddressInput;
-        let docNumberInput, docDateInput, dueDateInput, footerNotesInput;
-        let tvaRateInput, tvaTypeSelect;
-        let itemsContainer, previewArea;
-        
-        function setDefaultDate() {
+    ];
+    
+    let currentDocType = "devis";
+    
+    // Informations de l'entreprise (pour les documents PDF)
+    const companyInfo = {
+        name: "NOVA Startup TECH CI",
+        address: "Korhogo & Abidjan - Côte d'Ivoire",
+        phone: "+225 05 54 10 18 73",
+        email: "nstci2025@gmail.com",
+        rc: "CI-ABJ-2025-12345",
+        cc: "123456789",
+        cta: "0123456789",
+        capital: "10.000.000 FCFA"
+    };
+    
+    const itemsBody = document.getElementById('itemsBody');
+    const totalHTSpan = document.getElementById('totalHT');
+    const totalVATSpan = document.getElementById('totalVAT');
+    const totalDiscountSpan = document.getElementById('totalDiscount');
+    const grandTotalSpan = document.getElementById('grandTotalSpan');
+    const taxRateInput = document.getElementById('taxRate');
+    const discountRateInput = document.getElementById('discountRate');
+    const taxPercentSpan = document.getElementById('taxPercentSpan');
+    const discountSpan = document.getElementById('discountSpan');
+    const docNumberInput = document.getElementById('docNumber');
+    const docDateInput = document.getElementById('docDate');
+    const clientNameInput = document.getElementById('clientName');
+    const clientEmailInput = document.getElementById('clientEmail');
+    const clientAddressInput = document.getElementById('clientAddress');
+    const notesField = document.getElementById('notesField');
+    const currentDocTypeLabel = document.getElementById('currentDocTypeLabel');
+    const livePreviewDiv = document.getElementById('livePreview');
+
+    function setDefaultDate() {
+        if (!docDateInput.value) {
             const today = new Date().toISOString().slice(0,10);
-            if(docDateInput && !docDateInput.value) docDateInput.value = today;
-            const due = new Date();
-            due.setDate(due.getDate() + 30);
-            if(dueDateInput && !dueDateInput.value) dueDateInput.value = due.toISOString().slice(0,10);
+            docDateInput.value = today;
         }
+    }
+    
+    function computeTotals() {
+        let totalHT = 0;
+        items.forEach(item => {
+            totalHT += (item.quantity || 0) * (item.unitPrice || 0);
+        });
+        const taxRate = parseFloat(taxRateInput.value) || 0;
+        const discountRate = parseFloat(discountRateInput.value) || 0;
+        const discountAmount = (totalHT * discountRate) / 100;
+        const afterDiscountHT = totalHT - discountAmount;
+        const vatAmount = afterDiscountHT * (taxRate / 100);
+        const totalTTC = afterDiscountHT + vatAmount;
         
-        function setDefaultDocumentNumberIfEmpty() {
-            if(docNumberInput && (!docNumberInput.value || docNumberInput.value.trim() === '')) {
-                docNumberInput.value = generateDocumentNumber(currentDocType);
-                incrementCounter(currentDocType);
-            }
-        }
+        totalHTSpan.innerText = totalHT.toFixed(2) + " FCFA";
+        totalVATSpan.innerText = vatAmount.toFixed(2) + " FCFA";
+        totalDiscountSpan.innerText = discountAmount.toFixed(2) + " FCFA";
+        grandTotalSpan.innerText = totalTTC.toFixed(2) + " FCFA";
+        taxPercentSpan.innerText = taxRate;
+        discountSpan.innerText = discountRate;
         
-        function initDOM() {
-            companyNameInput = document.getElementById('companyName');
-            companyAddressInput = document.getElementById('companyAddress');
-            clientNameInput = document.getElementById('clientName');
-            clientAddressInput = document.getElementById('clientAddress');
-            docNumberInput = document.getElementById('docNumber');
-            docDateInput = document.getElementById('docDate');
-            dueDateInput = document.getElementById('dueDate');
-            footerNotesInput = document.getElementById('footerNotes');
-            tvaRateInput = document.getElementById('tvaRate');
-            tvaTypeSelect = document.getElementById('tvaType');
-            itemsContainer = document.getElementById('itemsContainer');
-            previewArea = document.getElementById('invoicePreviewArea');
-            
-            setDefaultDocumentNumberIfEmpty();
-            setDefaultDate();
-            
-            document.getElementById('addItemBtn').addEventListener('click', () => {
-                items.push({ description: "", quantity: 1, unitPrice: 0 });
-                renderItemsForm();
-                updatePreview();
+        return { totalHT, afterDiscountHT, vatAmount, totalTTC, discountAmount, taxRate, discountRate };
+    }
+    
+    function escapeHtml(str) { 
+        if(!str) return '';
+        return str.replace(/[&<>]/g, function(m){
+            if(m==='&') return '&amp;'; 
+            if(m==='<') return '&lt;'; 
+            if(m==='>') return '&gt;'; 
+            return m;
+        }); 
+    }
+    
+    function renderItemsTable() {
+        itemsBody.innerHTML = '';
+        items.forEach((item, idx) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><input type="text" value="${escapeHtml(item.description)}" class="item-desc" data-idx="${idx}" style="width:100%; min-width:120px;"></td>
+                <td class="item-qty"><input type="number" step="1" value="${item.quantity}" class="item-qty-input" data-idx="${idx}" style="width:80px;"></td>
+                <td class="item-price"><input type="number" step="0.01" value="${item.unitPrice}" class="item-price-input" data-idx="${idx}" style="width:100px;"></td>
+                <td class="right">${((item.quantity || 0) * (item.unitPrice || 0)).toFixed(2)} FCFA</td>
+                <td class="item-delete"><i class="fas fa-trash-alt" data-idx="${idx}" style="cursor:pointer;"></i></td>
+            `;
+            itemsBody.appendChild(row);
+        });
+        
+        document.querySelectorAll('.item-desc').forEach(inp => {
+            inp.addEventListener('change', (e) => { items[e.target.dataset.idx].description = e.target.value; refreshAll(); });
+        });
+        document.querySelectorAll('.item-qty-input').forEach(inp => {
+            inp.addEventListener('input', (e) => { items[e.target.dataset.idx].quantity = parseFloat(e.target.value) || 0; refreshAll(); });
+        });
+        document.querySelectorAll('.item-price-input').forEach(inp => {
+            inp.addEventListener('input', (e) => { items[e.target.dataset.idx].unitPrice = parseFloat(e.target.value) || 0; refreshAll(); });
+        });
+        document.querySelectorAll('.item-delete i').forEach(icon => {
+            icon.addEventListener('click', (e) => { 
+                const idx = parseInt(e.currentTarget.getAttribute('data-idx')); 
+                items.splice(idx, 1); 
+                refreshAll(); 
             });
-            
-            const inputs = [companyNameInput, companyAddressInput, clientNameInput, clientAddressInput, docNumberInput, docDateInput, dueDateInput, footerNotesInput, tvaRateInput, tvaTypeSelect];
-            inputs.forEach(inp => { if(inp) inp.addEventListener('input', () => updatePreview()); });
-            if(tvaTypeSelect) tvaTypeSelect.addEventListener('change', () => updatePreview());
+        });
+        computeTotals();
+    }
+    
+    function getDocumentTitleAndSub() {
+        if (currentDocType === "devis") { 
+            return { title: "DEVIS", sub: "Document non contractuel - Devis valable 30 jours" }; 
+        } else if (currentDocType === "proforma") { 
+            return { title: "FACTURE PROFORMA", sub: "Document proforma – En attente de validation" }; 
+        } else { 
+            return { title: "FACTURE", sub: "Facture acquittée / à régler selon conditions" }; 
         }
+    }
+    
+    function updatePreview() {
+        const totals = computeTotals();
+        const docNumber = docNumberInput.value.trim() || "N° à définir";
+        const docDate = docDateInput.value || "Date non définie";
+        const client = clientNameInput.value.trim() || "Client non renseigné";
+        const clientEmail = clientEmailInput.value.trim() || "";
+        const clientAddr = clientAddressInput.value.trim() || "";
+        const notes = notesField.value.trim() || "";
+        const taxRate = totals.taxRate;
+        const discountRate = totals.discountRate;
+        const totalHT = totals.totalHT;
+        const discountAmount = totals.discountAmount;
+        const vatAmount = totals.vatAmount;
+        const totalTTC = totals.totalTTC;
         
-        function renderItemsForm() {
-            itemsContainer.innerHTML = '';
-            if(items.length === 0) {
-                const emptyMsg = document.createElement('div');
-                emptyMsg.style.textAlign = 'center';
-                emptyMsg.style.padding = '20px';
-                emptyMsg.style.color = '#9ca3af';
-                emptyMsg.textContent = 'Aucun article. Cliquez sur "+ Ajouter une ligne"';
-                itemsContainer.appendChild(emptyMsg);
-                return;
-            }
-            
-            items.forEach((item, idx) => {
-                const lineDiv = document.createElement('div');
-                lineDiv.className = 'item-line';
-                
-                const descInput = document.createElement('input');
-                descInput.type = 'text';
-                descInput.placeholder = 'Description';
-                descInput.value = item.description;
-                descInput.addEventListener('input', (e) => { items[idx].description = e.target.value; updatePreview(); });
-                
-                const qtyInput = document.createElement('input');
-                qtyInput.type = 'number';
-                qtyInput.placeholder = 'Qté';
-                qtyInput.className = 'qty';
-                qtyInput.value = item.quantity;
-                qtyInput.addEventListener('input', (e) => { items[idx].quantity = parseFloat(e.target.value) || 0; updatePreview(); });
-                
-                const priceInput = document.createElement('input');
-                priceInput.type = 'number';
-                priceInput.step = '0.01';
-                priceInput.placeholder = 'Prix U HT';
-                priceInput.className = 'price';
-                priceInput.value = item.unitPrice;
-                priceInput.addEventListener('input', (e) => { items[idx].unitPrice = parseFloat(e.target.value) || 0; updatePreview(); });
-                
-                const delBtn = document.createElement('button');
-                delBtn.textContent = '✕';
-                delBtn.addEventListener('click', () => { items.splice(idx, 1); renderItemsForm(); updatePreview(); });
-                
-                lineDiv.appendChild(descInput);
-                lineDiv.appendChild(qtyInput);
-                lineDiv.appendChild(priceInput);
-                lineDiv.appendChild(delBtn);
-                itemsContainer.appendChild(lineDiv);
-            });
-        }
+        const { title, sub } = getDocumentTitleAndSub();
         
-        function formatMoney(amount) {
-            return new Intl.NumberFormat('fr-FR').format(amount) + ' F CFA';
-        }
+        let rowsHtml = "";
+        items.forEach(item => {
+            const totalLine = ((item.quantity || 0) * (item.unitPrice || 0)).toFixed(2);
+            rowsHtml += `
+                <tr>
+                    <td>${escapeHtml(item.description)}</td>
+                    <td class="right">${item.quantity || 0}</td>
+                    <td class="right">${(item.unitPrice || 0).toFixed(2)} FCFA</td>
+                    <td class="right">${totalLine} FCFA</td>
+                </tr>
+            `;
+        });
+        if(items.length === 0) rowsHtml = "<tr><td colspan='4' style='text-align:center;'>Aucun article ajouté</td></tr>";
         
-        function formatDate(dateString) {
-            if(!dateString) return 'Non définie';
-            const d = new Date(dateString);
-            if(isNaN(d.getTime())) return dateString;
-            return d.toLocaleDateString('fr-FR');
-        }
-        
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/[&<>]/g, function(m) {
-                if(m === '&') return '&amp;';
-                if(m === '<') return '&lt;';
-                if(m === '>') return '&gt;';
-                return m;
-            }).replace(/\n/g, '<br>');
-        }
-        
-        function getDocumentTitle() {
-            switch(currentDocType) {
-                case 'proforma': return 'FACTURE PROFORMA';
-                case 'paid': return 'FACTURE ACQUITTÉE';
-                case 'quote': return 'DEVIS';
-                default: return 'DOCUMENT COMMERCIAL';
-            }
-        }
-        
-        function getStatusBadge() {
-            switch(currentDocType) {
-                case 'proforma': return '<span class="status-badge status-proforma"> Proforma - Sans valeur fiscale</span>';
-                case 'paid': return '<span class="status-badge status-paid">✅ Payée - Acquittée</span>';
-                case 'quote': return '<span class="status-badge status-quote"> Devis valable 30 jours</span>';
-                default: return '';
-            }
-        }
-        
-        function generateQRCode() {
-            const company = companyNameInput?.value || "NOVA Startup Technologie CI";
-            const client = clientNameInput?.value || "Client";
-            const docNum = docNumberInput?.value || "Document";
-            const date = docDateInput?.value || new Date().toISOString().slice(0,10);
-            return `Document signé électroniquement\n${getDocumentTitle()}\nN°: ${docNum}\nDate: ${formatDate(date)}\nClient: ${client}\nSociété: ${company}\nSite: nstcisecure.netlify.app`;
-        }
-        
-        function calculateTVA() {
-            // Récupérer le taux TVA (peut être 0 si exonéré)
-            let tvaRateValue = parseFloat(tvaRateInput?.value) || 0;
-            const tvaType = tvaTypeSelect?.value || "TVA normale";
-            
-            // Si le type est "Exonéré", on force le taux à 0
-            if(tvaType === "Exonéré") {
-                tvaRateValue = 0;
-            }
-            
-            return tvaRateValue;
-        }
-
-        function updatePreview() {
-            const company = companyNameInput?.value || "NOVA Startup Technologie CI";
-            const companyAddr = companyAddressInput?.value || "KORHOGO, Côte d'Ivoire<br>Tél: 0554101873<br>Site: nstcisecure.netlify.app";
-            const client = clientNameInput?.value || "";
-            const clientAddr = clientAddressInput?.value || "";
-            const docNumber = docNumberInput?.value || "";
-            const docDate = docDateInput?.value || "";
-            const due = dueDateInput?.value || "";
-            const footerNote = footerNotesInput?.value || "";
-            
-            // Calcul de la TVA avec la nouvelle fonction
-            const tvaRateValue = calculateTVA();
-            const tvaRate = tvaRateValue / 100;
-            const tvaTypeText = tvaTypeSelect?.value || "TVA normale";
-            
-            let subTotal = 0;
-            const rows = items.map(item => {
-                const qty = item.quantity || 0;
-                const price = item.unitPrice || 0;
-                const total = qty * price;
-                subTotal += total;
-                return `<tr><td style="padding: 8px;">${escapeHtml(item.description || '---')}</td><td class="text-right">${qty}</td><td class="text-right">${formatMoney(price)}</td><td class="text-right">${formatMoney(total)}</td></tr>`;
-            }).join('');
-            
-            const tvaAmount = subTotal * tvaRate;
-            const grandTotal = subTotal + tvaAmount;
-            
-            // Affichage conditionnel de la ligne TVA
-            let tvaLine = '';
-            if(tvaRateValue > 0) {
-                tvaLine = `<tr><td style="width:70%">${tvaTypeText} (${tvaRateValue}%) :</td><td class="text-right">${formatMoney(tvaAmount)}</td></tr>`;
-            } else if(tvaTypeText === "Exonéré") {
-                tvaLine = `<tr><td style="width:70%">Exonéré de TVA :</td><td class="text-right">0 F CFA</td></tr>`;
-            } else {
-                tvaLine = `<tr><td style="width:70%">TVA (0%) :</td><td class="text-right">0 F CFA</td></tr>`;
-            }
-            
-            let footerMessage = "";
-            if(currentDocType === 'quote') footerMessage = "Devis valable 30 jours. Signature pour acceptation.";
-            else if(currentDocType === 'proforma') footerMessage = "Facture proforma sans valeur fiscale - Document commercial";
-            else footerMessage = "Facture acquittée - Merci de votre règlement";
-            
-            const signatureData = generateQRCode();
-            const qrId = 'qr_' + Date.now();
-            
-            const html = `
-                <div class="invoice" id="realInvoiceContent">
-                    <div class="invoice-header">
+        livePreviewDiv.innerHTML = `
+            <div style="font-family: 'Inter', sans-serif;">
+                <div style="margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #1e3c72;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
                         <div>
-                            <h2>${escapeHtml(company)}</h2>
-                            <div style="font-size:0.85rem; white-space:pre-line;">${escapeHtml(companyAddr)}</div>
+                            <div style="font-weight: 800; font-size: 1.2rem; color: #1e3c72;">${escapeHtml(companyInfo.name)}</div>
+                            <div style="font-size: 0.65rem; color: #5b6e8c;">${escapeHtml(companyInfo.address)}</div>
+                            <div style="font-size: 0.65rem; color: #5b6e8c;">Tel: ${escapeHtml(companyInfo.phone)} | Email: ${escapeHtml(companyInfo.email)}</div>
                         </div>
-                        <div class="invoice-title">
-                            <h3>${getDocumentTitle()}</h3>
-                            <div>N° ${escapeHtml(docNumber)}</div>
-                            ${getStatusBadge()}
+                        <div style="text-align: right;">
+                            <div style="font-size: 1.8rem; font-weight: 800; color: #1e3c72;">${title}</div>
+                            <div style="font-size: 0.7rem;">${sub}</div>
                         </div>
                     </div>
-                    <div class="client-section">
-                        <div><strong>Facturer à :</strong><br>${escapeHtml(client) || '—'}<br>${escapeHtml(clientAddr) || '—'}</div>
-                        <div><strong>Date :</strong> ${formatDate(docDate)}<br>${due ? `<strong>Échéance :</strong> ${formatDate(due)}` : ''}</div>
+                </div>
+                <div class="doc-header" style="margin-top: 10px;">
+                    <div><strong>N° ${escapeHtml(docNumber)}</strong><br>Date : ${escapeHtml(docDate)}</div>
+                    <div class="doc-infos"><strong>Client :</strong> ${escapeHtml(client)}${clientEmail ? `<br>Email & Tél : ${escapeHtml(clientEmail)}` : ''}</div>
+                </div>
+                <div style="margin-bottom: 18px;">
+                    <div style="white-space: pre-line; font-size:0.8rem;">${escapeHtml(clientAddr)}</div>
+                </div>
+                <table class="preview-table" style="width:100%;">
+                    <thead><tr><th>Désignation</th><th class="right">Qté</th><th class="right">Prix unit.</th><th class="right">Total HT</th></tr></thead>
+                    <tbody>${rowsHtml}</tbody>
+                </table>
+                <div class="total-preview">
+                    <div>Total HT : ${totalHT.toFixed(2)} FCFA</div>
+                    ${discountRate > 0 ? `<div>Remise (${discountRate}%) : - ${discountAmount.toFixed(2)} FCFA</div>` : ''}
+                    <div>TVA (${taxRate}%) : ${vatAmount.toFixed(2)} FCFA</div>
+                    <div style="font-size:1.3rem; font-weight:800; margin-top:8px;">TOTAL TTC : ${totalTTC.toFixed(2)} FCFA</div>
+                </div>
+                <div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 12px; font-size:0.75rem; color:#4a627a;">
+                    <p>${escapeHtml(notes)}</p>
+                </div>
+                <div class="signature-area">
+                    <span>Fait à Abidjan, le ${new Date().toLocaleDateString('fr-FR')}</span>
+                    <span>Signature client précèdée de la mention "Bon pour accord"</span>
+                </div>
+            </div>
+        `;
+        
+        let labelText = "";
+        if (currentDocType === "devis") labelText = "📄 Devis";
+        else if (currentDocType === "proforma") labelText = "📑 Facture Proforma";
+        else labelText = "🧾 Facture finale";
+        currentDocTypeLabel.innerText = labelText;
+    }
+    
+    function generatePDF() {
+        const totals = computeTotals();
+        const docNumber = docNumberInput.value.trim() || "N° à définir";
+        const docDate = docDateInput.value || "Date non définie";
+        const client = clientNameInput.value.trim() || "Client non renseigné";
+        const clientEmail = clientEmailInput.value.trim() || "";
+        const clientAddr = clientAddressInput.value.trim() || "";
+        const notes = notesField.value.trim() || "";
+        const taxRate = totals.taxRate;
+        const discountRate = totals.discountRate;
+        const totalHT = totals.totalHT;
+        const discountAmount = totals.discountAmount;
+        const vatAmount = totals.vatAmount;
+        const totalTTC = totals.totalTTC;
+        
+        const { title, sub } = getDocumentTitleAndSub();
+        
+        let rowsHtml = "";
+        items.forEach(item => {
+            const totalLine = ((item.quantity || 0) * (item.unitPrice || 0)).toFixed(2);
+            rowsHtml += `
+                <tr>
+                    <td style="padding: 10px; border-bottom: 1px solid #ddd;">${escapeHtml(item.description)}</td>
+                    <td style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">${item.quantity || 0}</td>
+                    <td style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">${(item.unitPrice || 0).toFixed(2)} FCFA</td>
+                    <td style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">${totalLine} FCFA</td>
+                </tr>
+            `;
+        });
+        
+        if(items.length === 0) rowsHtml = "<tr><td colspan='4' style='padding:20px;text-align:center;'>Aucun article ajouté</td></tr>";
+        
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'absolute';
+        iframe.style.left = '-9999px';
+        iframe.style.top = '-9999px';
+        document.body.appendChild(iframe);
+        
+        const doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>${title} - ${docNumber} | ${companyInfo.name}</title>
+                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+                <style>
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    body { 
+                        font-family: 'Inter', sans-serif; 
+                        padding: 40px; 
+                        color: #1e293b;
+                        background: white;
+                    }
+                    .document-container {
+                        max-width: 1000px;
+                        margin: 0 auto;
+                    }
+                    .company-header {
+                        margin-bottom: 25px;
+                        padding-bottom: 15px;
+                        border-bottom: 3px solid #1e3c72;
+                    }
+                    .company-name {
+                        font-size: 1.3rem;
+                        font-weight: 800;
+                        color: #1e3c72;
+                    }
+                    .company-details {
+                        font-size: 0.7rem;
+                        color: #5b6e8c;
+                        margin-top: 5px;
+                        line-height: 1.4;
+                    }
+                    .doc-title-area {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: flex-start;
+                        margin-bottom: 20px;
+                    }
+                    .title {
+                        font-size: 2rem;
+                        font-weight: 800;
+                        color: #1e3c72;
+                    }
+                    .sub {
+                        font-size: 0.7rem;
+                        color: #5b6e8c;
+                    }
+                    .infos {
+                        text-align: right;
+                        font-size: 0.85rem;
+                    }
+                    .client-box {
+                        margin-bottom: 25px;
+                        padding: 12px;
+                        background: #f8fafc;
+                        border-radius: 8px;
+                    }
+                    .client-name {
+                        font-weight: 700;
+                        font-size: 1rem;
+                    }
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin: 20px 0;
+                    }
+                    th {
+                        background: #f1f5f9;
+                        padding: 12px;
+                        text-align: left;
+                        font-weight: 600;
+                        color: #1e3c72;
+                        border-bottom: 2px solid #e2e8f0;
+                    }
+                    td {
+                        padding: 10px;
+                        border-bottom: 1px solid #e2e8f0;
+                    }
+                    .right {
+                        text-align: right;
+                    }
+                    .totals {
+                        margin-top: 20px;
+                        padding-top: 20px;
+                        border-top: 2px solid #e2e8f0;
+                        text-align: right;
+                    }
+                    .total-line {
+                        margin: 6px 0;
+                        font-size: 0.9rem;
+                    }
+                    .grand-total {
+                        font-size: 1.3rem;
+                        font-weight: 800;
+                        color: #1e3c72;
+                        margin-top: 8px;
+                    }
+                    .notes {
+                        margin-top: 25px;
+                        padding: 12px;
+                        background: #f8fafc;
+                        border-radius: 8px;
+                        font-size: 0.8rem;
+                    }
+                    .signature {
+                        margin-top: 35px;
+                        padding-top: 15px;
+                        border-top: 1px dashed #cbd5e1;
+                        display: flex;
+                        justify-content: space-between;
+                        font-size: 0.7rem;
+                        color: #64748b;
+                    }
+                    .footer {
+                        margin-top: 30px;
+                        text-align: center;
+                        font-size: 0.65rem;
+                        color: #94a3b8;
+                    }
+                    @media print {
+                        body { padding: 0; }
+                        @page { size: A4; margin: 2cm; }
+                    }
+                </style>
+            </head>
+           
+
+
+
+                <div class="document-container">
+                    <div class="company-header">
+                        <div class="company-name">${escapeHtml(companyInfo.name)}</div>
+                        <div class="company-details">
+                            ${escapeHtml(companyInfo.address)}<br>
+                            Tel: ${escapeHtml(companyInfo.phone)} | Email: ${escapeHtml(companyInfo.email)}<br>
+                            RC: ${escapeHtml(companyInfo.rc)} | CC: ${escapeHtml(companyInfo.cc)} | N°CTA: ${escapeHtml(companyInfo.cta)} | Capital: ${escapeHtml(companyInfo.capital)}
+                        </div>
                     </div>
                     
-                    <table class="items">
-                        <thead><tr><th>Désignation</th><th class="text-right">Qté</th><th class="text-right">Prix HT</th><th class="text-right">Total HT</th></thead>
-                        <tbody>${rows || '<tr><td colspan="4" style="text-align:center;">Aucun article</td></tr>'}</tbody>
+                    <div class="doc-title-area">
+                        <div>
+                            <div class="title">${title}</div>
+                            <div class="sub">${sub}</div>
+                        </div>
+                        <div class="infos">
+                            <strong>N° ${escapeHtml(docNumber)}</strong><br>
+                            Date : ${escapeHtml(docDate)}
+                        </div>
+                    </div>
+                    
+                    <div class="client-box">
+                        <div class="client-name">${escapeHtml(client)}</div>
+                        ${clientEmail ? `<div>${escapeHtml(clientEmail)}</div>` : ''}
+                        ${clientAddr ? `<div style="margin-top: 5px;">${escapeHtml(clientAddr)}</div>` : ''}
+                    </div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Désignation</th>
+                                <th class="right">Qté</th>
+                                <th class="right">Prix unit.</th>
+                                <th class="right">Total HT</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHtml}
+                       
+
                     </table>
                     
                     <div class="totals">
-                        <table>
-                            <tr><td style="width:70%">Sous-total HT :</td><td class="text-right">${formatMoney(subTotal)}</td></tr>
-                            ${tvaLine}
-                            <tr class="grand-total"><td><strong>Total TTC</strong> :</td><td class="text-right"><strong>${formatMoney(grandTotal)}</strong></td></tr>
-                        </table>
+                        <div class="total-line">Total HT : ${totalHT.toFixed(2)} FCFA</div>
+                        ${discountRate > 0 ? `<div class="total-line">Remise (${discountRate}%) : - ${discountAmount.toFixed(2)} FCFA</div>` : ''}
+                        <div class="total-line">TVA (${taxRate}%) : ${vatAmount.toFixed(2)} FCFA</div>
+                        <div class="grand-total">TOTAL TTC : ${totalTTC.toFixed(2)} FCFA</div>
                     </div>
                     
-                    <!-- SECTION PAIEMENT -->
-                    <div class="payment-section-invoice">
-                        <h4>PAIEMENT</h4>
-                        <div class="payment-methods-invoice">
-                            <div class="cash-item">Paiement en espèces accepté</div>
-                            <div class="mobile-item-invoice">
-                                <strong>Mobile Banking</strong> - Compte: <strong>Coulibaly D L</strong>
-                                <div class="numbers-list">
-                                    <span>Wave: +225 05 54 10 18 73</span>
-                                    <span>MTN: +225 05 54 10 18 73</span>
-                                    <span>Orange: +225 07 16 85 15 25</span>
-                                    <span>Trésor Money: +225 05 54 10 18 73</span>
-                                </div>
-                            </div>
-                        </div>
+                    ${notes ? `<div class="notes"><strong>Notes & conditions :</strong><br>${escapeHtml(notes)}</div>` : ''}
+                    
+                    <div class="signature">
+                        <span>Fait à Abidjan, le ${new Date().toLocaleDateString('fr-FR')}</span>
+                        <span>Signature client précèdée de la mention "Bon pour accord"</span>
                     </div>
                     
-                    <!-- SECTION INCLUSIONS -->
-                    <div class="inclusions-section-invoice">
-                        <h4>VOTRE INSTALLATION INCLUT GRATUITEMENT :</h4>
-                        <ul>
-                            <li>✓ Protocole de sécurité personnalisé</li>
-                            <li>✓ Formation des utilisateurs</li>
-                            <li>✓ Maintenance préventive 6 mois</li>
-                        </ul>
-                    </div>
-                    
-                    <!-- SECTION ENGAGEMENT -->
-                    <div class="engagement-section-invoice">
-                        <h4>NOTRE ENGAGEMENT :</h4>
-                        <ul>
-                            <li>• Matériel homologué et certifié</li>
-                            <li>• Installation par techniciens certifiés</li>
-                            <li>• Tests complets avant remise</li>
-                            <li>• Dépannage sous 24h (7j/7j)</li>
-                            <li>• Garantie de l'équipement 1 mois</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="footer-note">${escapeHtml(footerNote || footerMessage)}<br><small>Généré par NOVA FACT - nstcisecure.netlify.app</small></div>
-                    
-                    <div class="signature-qr">
-                        <div class="qr-container" id="${qrId}"></div>
-                        <div style="font-size:0.7rem; margin-top:8px;">Document certifié</div>
+                    <div class="footer">
+                        ${currentDocType === "devis" ? "Devis établi électroniquement - Valable 30 jours" : 
+                          (currentDocType === "proforma" ? "Facture Proforma - Sans valeur de facture définitive" : 
+                          "Facture définitive - Merci de votre règlement")}<br>
+                        ${companyInfo.name} - Tous droits réservés
                     </div>
                 </div>
-            `;
             
-            if(previewArea) {
-                previewArea.innerHTML = html;
-                setTimeout(() => {
-                    const qrDiv = document.getElementById(qrId);
-                    if(qrDiv && typeof QRCode !== 'undefined') {
-                        qrDiv.innerHTML = '';
-                        new QRCode(qrDiv, { text: signatureData, width: 100, height: 100 });
-                    }
-                }, 50);
-            }
-        }
-
-        function printDocument() {
-            updatePreview();
-            const printContent = document.getElementById('realInvoiceContent');
-            if(!printContent) { alert("Erreur génération"); return; }
-            const originalTitle = document.title;
-            document.title = `${getDocumentTitle()}_${docNumberInput?.value || 'document'}`;
-            const printWindow = window.open('', '_blank', 'width=900,height=700,toolbar=yes');
-            printWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head><meta charset="UTF-8"><title>${getDocumentTitle()}</title>
-                <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"><\/script>
-                <style>
-                    body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 1.5cm; background: white; }
-                    ${document.querySelector('style').innerHTML}
-                    .menu-bar, .form-section, .action-buttons, .document-type, .type-btn, .logout-btn, .add-item-btn, .item-line button, .btn-action { display: none !important; }
-                    .invoice-preview { all: unset; display: block; }
-                    .two-columns { display: block; }
-                </style>
-                </head>
-                <body>${printContent.outerHTML}
-                <script>
-                    setTimeout(() => {
-                        const qrDivs = document.querySelectorAll('[id^="qr_"]');
-                        qrDivs.forEach(div => {
-                            if(typeof QRCode !== 'undefined') {
-                                new QRCode(div, { text: 'Document signé NOVA', width: 100, height: 100 });
-                            }
-                        });
-                    }, 100);
-                    window.onload = () => { setTimeout(() => { window.print(); setTimeout(() => window.close(), 800); }, 200); };
-                <\/script>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-            document.title = originalTitle;
-        }
+        `);
+        doc.close();
         
-        function setDocumentType(type) {
-            currentDocType = type;
-            if(docNumberInput && (!docNumberInput.value || docNumberInput.value.trim() === '')) {
-                docNumberInput.value = generateDocumentNumber(currentDocType);
-                incrementCounter(currentDocType);
-            }
-            updatePreview();
-            document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+        setTimeout(() => {
+            iframe.contentWindow.print();
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+            }, 1000);
+        }, 500);
+    }
+    
+    function refreshAll() {
+        renderItemsTable();
+        updatePreview();
+        computeTotals();
+    }
+    
+    function setDocType(type) {
+        currentDocType = type;
+        let prefix = "";
+        if (type === "devis") prefix = "DEV-";
+        else if (type === "proforma") prefix = "PRO-";
+        else prefix = "FAC-";
+        
+        const currentVal = docNumberInput.value;
+        if (!currentVal.startsWith(prefix) && currentVal.length < 10) {
+            docNumberInput.value = prefix + currentVal.replace(/^(DEV-|PRO-|FAC-)/, '');
         }
-        
-        function resetToEmpty() {
-            companyNameInput.value = "NOVA Startup Technologie CI";
-            companyAddressInput.value = "KORHOGO, Côte d'Ivoire\nTél: 0554101873\nSite: nstcisecure.netlify.app";
-            clientNameInput.value = "";
-            clientAddressInput.value = "";
-            footerNotesInput.value = "";
-            items = [];
-            renderItemsForm();
-            const today = new Date().toISOString().slice(0,10);
-            docDateInput.value = today;
-            const due = new Date();
-            due.setDate(due.getDate() + 30);
-            dueDateInput.value = due.toISOString().slice(0,10);
-            docNumberInput.value = generateDocumentNumber(currentDocType);
-            incrementCounter(currentDocType);
-            if(tvaRateInput) tvaRateInput.value = "18";
-            if(tvaTypeSelect) tvaTypeSelect.value = "TVA normale";
-            updatePreview();
-        }
-        
-        function handleLogin() {
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
-            const errorDiv = document.getElementById('loginError');
-            if(username === 'NOVA' && password === 'admin2026') {
-                document.getElementById('loginPage').style.display = 'none';
-                document.getElementById('appMain').style.display = 'block';
-                loadCounters();
-                initDOM();
-                renderItemsForm();
-                updatePreview();
-            } else {
-                errorDiv.style.display = 'block';
-                errorDiv.textContent = '❌ Identifiant ou mot de passe incorrect';
-                setTimeout(() => errorDiv.style.display = 'none', 3000);
-            }
-        }
-        
-        function logout() {
-            document.getElementById('loginPage').style.display = 'flex';
-            document.getElementById('appMain').style.display = 'none';
-            document.getElementById('loginUsername').value = 'NOVA';
-            document.getElementById('loginPassword').value = '';
-        }
-        
-        window.handleLogin = handleLogin;
-        window.logout = logout;
-        window.resetToEmpty = resetToEmpty;
-        window.setDocumentType = setDocumentType;
-        window.printDocument = printDocument;
-        
-        loadCounters();
-    </script>
+        updatePreview();
+    }
+    
+    function addItem() {
+        items.push({ description: "Nouvelle prestation", quantity: 1, unitPrice: 0 });
+        refreshAll();
+    }
+    
+    function resetForm() {
+        items = [
+            { description: "Prestation de conseil import/export", quantity: 1, unitPrice: 500000 },
+            { description: "Frais de douane et dédouanement", quantity: 1, unitPrice: 250000 }
+        ];
+        docNumberInput.value = "DEV-001";
+        const today = new Date().toISOString().slice(0,10);
+        docDateInput.value = today;
+        clientNameInput.value = "NOVA Startup TECH CI"; 
+        clientEmailInput.value = "nstci2025@gmail.com";
+        clientAddressInput.value = "Korhogo/Abidjan CI";
+        notesField.value = "Paiement à réception - Merci de votre confiance";
+        taxRateInput.value = "20";
+        discountRateInput.value = "0";
+        currentDocType = "devis";
+        refreshAll();
+        setDocType("devis");
+    }
+    
+    document.getElementById('addItemBtn').addEventListener('click', addItem);
+    document.getElementById('createQuoteBtn').addEventListener('click', () => setDocType('devis'));
+    document.getElementById('createProformaBtn').addEventListener('click', () => setDocType('proforma'));
+    document.getElementById('createInvoiceBtn').addEventListener('click', () => setDocType('invoice'));
+    document.getElementById('resetFormBtn').addEventListener('click', resetForm);
+    document.getElementById('generatePdfBtn').addEventListener('click', generatePDF);
+    
+    taxRateInput.addEventListener('input', refreshAll);
+    discountRateInput.addEventListener('input', refreshAll);
+    docNumberInput.addEventListener('input', updatePreview);
+    docDateInput.addEventListener('input', updatePreview);
+    clientNameInput.addEventListener('input', updatePreview);
+    clientEmailInput.addEventListener('input', updatePreview);
+    clientAddressInput.addEventListener('input', updatePreview);
+    notesField.addEventListener('input', updatePreview);
+    
+    setDefaultDate();
+    refreshAll();
+    setDocType('devis');
+</script>
 </body>
 </html>
