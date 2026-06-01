@@ -481,15 +481,30 @@
             itemsBody.appendChild(row);
         });
         
-        document.querySelectorAll('.item-desc').forEach(inp => {
-            inp.addEventListener('change', (e) => { items[e.target.dataset.idx].description = e.target.value; refreshAll(); });
-        });
-        document.querySelectorAll('.item-qty-input').forEach(inp => {
-            inp.addEventListener('input', (e) => { items[e.target.dataset.idx].quantity = parseFloat(e.target.value) || 0; refreshAll(); });
-        });
-        document.querySelectorAll('.item-price-input').forEach(inp => {
-            inp.addEventListener('input', (e) => { items[e.target.dataset.idx].unitPrice = parseFloat(e.target.value) || 0; refreshAll(); });
-        });
+       
+document.querySelectorAll('.item-qty-input').forEach(inp => {
+    inp.addEventListener('input', (e) => {
+        items[e.target.dataset.idx].quantity =
+            parseFloat(e.target.value) || 0;
+
+        computeTotals();
+        updatePreview();
+    });
+});
+
+document.querySelectorAll('.item-price-input').forEach(inp => {
+    inp.addEventListener('input', (e) => {
+        items[e.target.dataset.idx].unitPrice =
+            parseFloat(e.target.value) || 0;
+
+        computeTotals();
+        updatePreview();
+    });
+});
+
+
+
+
         document.querySelectorAll('.item-delete i').forEach(icon => {
             icon.addEventListener('click', (e) => { 
                 const idx = parseInt(e.currentTarget.getAttribute('data-idx')); 
