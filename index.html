@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Gestion Pro - Devis, Facture Proforma & Facture | COULIBALY IMPORT EXPORT</title>
+    <title>Gestion Pro - Devis, Facture Proforma & Facture | NOVA Startup TECH CI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -285,6 +285,23 @@
             justify-content: space-between;
             color: #6b85a3;
         }
+        /* style pour input description inline */
+        .item-desc-input {
+            width: 100%;
+            min-width: 160px;
+            padding: 8px 8px;
+            border-radius: 12px;
+            border: 1px solid #dce5f0;
+            font-size: 0.85rem;
+            background: #ffffff;
+        }
+        .item-qty-input, .item-price-input {
+            width: 85px;
+            padding: 8px 6px;
+            border-radius: 12px;
+            border: 1px solid #dce5f0;
+            text-align: right;
+        }
     </style>
 </head>
 <body>
@@ -296,7 +313,6 @@
                 <div><i class="fas fa-building"></i> <strong>NOVA Startup TECH CI</strong></div>
                 <div><i class="fas fa-map-marker-alt"></i> Korhogo & Abidjan - Côte d'Ivoire</div>
                 <div><i class="fas fa-phone"></i> +225 05 54 10 18 73 | <i class="fas fa-envelope"></i>nstci2025@gmail.com</div>
-                
             </div>
         </div>
         <div class="action-buttons">
@@ -326,11 +342,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Client / Société</label>
-                        <input type="text" id="clientName" placeholder="Nom du client" value=" Nom du client ou société">
+                        <input type="text" id="clientName" placeholder="Nom du client" value="NOVA Startup TECH CI">
                     </div>
                     <div class="form-group">
-                        <label>Email & Client </label>
-                        <input type="email" id="clientEmail" placeholder="client@exemple.com" value="+225 0505050505">
+                        <label>Email & Téléphone</label>
+                        <input type="email" id="clientEmail" placeholder="client@exemple.com" value="nstci2025@gmail.com">
                     </div>
                 </div>
                 <div class="form-group">
@@ -341,11 +357,11 @@
                 <label><i class="fas fa-list-ul"></i> Articles / Prestations</label>
                 <table class="items-table" id="itemsEditorTable">
                     <thead>
-                        <tr><th>Description</th><th>Qté</th><th>Prix unitaire HT (FCFA)</th><th>Total HT</th><th></th></tr>
+                        <tr><th>Désignation (libellé)</th><th>Qté</th><th>Prix unitaire HT (FCFA)</th><th>Total HT</th><th></th></tr>
                     </thead>
                     <tbody id="itemsBody"></tbody>
                 </table>
-                <button type="button" id="addItemBtn" class="add-item-btn"><i class="fas fa-plus-circle"></i> Ajouter une ligne</button>
+                <button type="button" id="addItemBtn" class="add-item-btn"><i class="fas fa-plus-circle"></i> Ajouter une ligne vide</button>
                 
                 <div class="form-row" style="margin-top: 20px;">
                     <div class="form-group">
@@ -372,7 +388,6 @@
 
         <div class="card">
             <div class="card-header">
-                <!-- <i class="fas fa-eye"></i> DOC NUMERIQUE -->
                 <span id="currentDocTypeLabel" style="font-size: 0.8rem; font-weight: normal; margin-left: auto;">(Devis)</span>
             </div>
             <div class="card-body doc-preview">
@@ -387,18 +402,16 @@
         </div>
     </div>
     <footer>
-        <i class="fas fa-calculator"></i> NOVA Startup TECH CI | 
+        <i class="fas fa-calculator"></i> NOVA Startup TECH CI | Gestion commerciale
     </footer>
 </div>
 
 <script>
-    let items = [
-        
-    ];
+    // Tableau des articles : chaque ligne contient description, quantity, unitPrice
+    let items = [];
     
     let currentDocType = "devis";
     
-    // Informations de l'entreprise (pour les documents PDF)
     const companyInfo = {
         name: "NOVA Startup TECH CI",
         address: "Korhogo & Abidjan - Côte d'Ivoire",
@@ -438,7 +451,9 @@
     function computeTotals() {
         let totalHT = 0;
         items.forEach(item => {
-            totalHT += (item.quantity || 0) * (item.unitPrice || 0);
+            const qty = parseFloat(item.quantity) || 0;
+            const price = parseFloat(item.unitPrice) || 0;
+            totalHT += qty * price;
         });
         const taxRate = parseFloat(taxRateInput.value) || 0;
         const discountRate = parseFloat(discountRateInput.value) || 0;
@@ -467,52 +482,117 @@
         }); 
     }
     
-    function renderItemsTable() {
+    // Rafraîchir le tableau éditable et l'aperçu
+    function refreshAll() {
+        renderEditableTable();
+        updatePreview();
+        computeTotals();
+    }
+    
+    // Afficher le tableau de saisie avec gestion dynamique des inputs
+    function renderEditableTable() {
         itemsBody.innerHTML = '';
-        items.forEach((item, idx) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td><input type="text" value="${escapeHtml(item.description)}" class="item-desc" data-idx="${idx}" style="width:100%; min-width:120px;"></td>
-                <td class="item-qty"><input type="number" step="1" value="${item.quantity}" class="item-qty-input" data-idx="${idx}" style="width:80px;"></td>
-                <td class="item-price"><input type="number" step="0.01" value="${item.unitPrice}" class="item-price-input" data-idx="${idx}" style="width:100px;"></td>
-                <td class="right">${((item.quantity || 0) * (item.unitPrice || 0)).toFixed(2)} FCFA</td>
-                <td class="item-delete"><i class="fas fa-trash-alt" data-idx="${idx}" style="cursor:pointer;"></i></td>
-            `;
-            itemsBody.appendChild(row);
-        });
-        
-       
-document.querySelectorAll('.item-qty-input').forEach(inp => {
-    inp.addEventListener('input', (e) => {
-        items[e.target.dataset.idx].quantity =
-            parseFloat(e.target.value) || 0;
-
-        computeTotals();
-        updatePreview();
-    });
-});
-
-document.querySelectorAll('.item-price-input').forEach(inp => {
-    inp.addEventListener('input', (e) => {
-        items[e.target.dataset.idx].unitPrice =
-            parseFloat(e.target.value) || 0;
-
-        computeTotals();
-        updatePreview();
-    });
-});
-
-
-
-
-        document.querySelectorAll('.item-delete i').forEach(icon => {
-            icon.addEventListener('click', (e) => { 
-                const idx = parseInt(e.currentTarget.getAttribute('data-idx')); 
-                items.splice(idx, 1); 
-                refreshAll(); 
+        if (!items.length) {
+            const emptyRow = document.createElement('tr');
+            emptyRow.innerHTML = `<td colspan="5" style="text-align:center; padding:20px; color:#8ba0bc;">Aucune ligne. Cliquez sur "Ajouter une ligne vide"</td>`;
+            itemsBody.appendChild(emptyRow);
+        } else {
+            items.forEach((item, idx) => {
+                const row = document.createElement('tr');
+                // description input
+                const descInput = document.createElement('input');
+                descInput.type = 'text';
+                descInput.className = 'item-desc-input';
+                descInput.value = item.description || '';
+                descInput.placeholder = 'Désignation du produit/service';
+                descInput.addEventListener('input', (e) => {
+                    items[idx].description = e.target.value;
+                    updatePreview();
+                    computeTotals();
+                });
+                const descCell = document.createElement('td');
+                descCell.appendChild(descInput);
+                
+                // quantité input
+                const qtyInput = document.createElement('input');
+                qtyInput.type = 'number';
+                qtyInput.step = '1';
+                qtyInput.min = '0';
+                qtyInput.className = 'item-qty-input';
+                qtyInput.value = item.quantity;
+                qtyInput.addEventListener('input', (e) => {
+                    let val = parseFloat(e.target.value);
+                    if (isNaN(val)) val = 0;
+                    items[idx].quantity = val;
+                    computeTotals();
+                    updatePreview();
+                });
+                const qtyCell = document.createElement('td');
+                qtyCell.appendChild(qtyInput);
+                
+                // prix input
+                const priceInput = document.createElement('input');
+                priceInput.type = 'number';
+                priceInput.step = '0.01';
+                priceInput.min = '0';
+                priceInput.className = 'item-price-input';
+                priceInput.value = item.unitPrice;
+                priceInput.addEventListener('input', (e) => {
+                    let val = parseFloat(e.target.value);
+                    if (isNaN(val)) val = 0;
+                    items[idx].unitPrice = val;
+                    computeTotals();
+                    updatePreview();
+                });
+                const priceCell = document.createElement('td');
+                priceCell.appendChild(priceInput);
+                
+                // total HT cellule
+                const totalCell = document.createElement('td');
+                totalCell.className = 'right';
+                const qty = parseFloat(item.quantity) || 0;
+                const price = parseFloat(item.unitPrice) || 0;
+                totalCell.innerText = (qty * price).toFixed(2) + ' FCFA';
+                
+                // delete button
+                const deleteCell = document.createElement('td');
+                deleteCell.className = 'item-delete';
+                const trashIcon = document.createElement('i');
+                trashIcon.className = 'fas fa-trash-alt';
+                trashIcon.style.cursor = 'pointer';
+                trashIcon.addEventListener('click', () => {
+                    items.splice(idx, 1);
+                    refreshAll();
+                });
+                deleteCell.appendChild(trashIcon);
+                
+                row.appendChild(descCell);
+                row.appendChild(qtyCell);
+                row.appendChild(priceCell);
+                row.appendChild(totalCell);
+                row.appendChild(deleteCell);
+                itemsBody.appendChild(row);
             });
+        }
+        
+        // Mise à jour des totaux des cellules après chaque modification (lié à refresh)
+        // On ajoute un listener supplémentaire pour recalculer l'affichage des totaux lignes à chaque event clavier
+        attachLiveTotalRefresh();
+    }
+    
+    // Met à jour les cellules "Total HT" du tableau sans recréer tout pour fluidité
+    function attachLiveTotalRefresh() {
+        // on parcourt chaque ligne et on recalcule l'affichage du total
+        const rows = itemsBody.querySelectorAll('tr');
+        rows.forEach((row, idx) => {
+            if (idx >= items.length) return;
+            const qtyVal = parseFloat(items[idx]?.quantity) || 0;
+            const priceVal = parseFloat(items[idx]?.unitPrice) || 0;
+            const totalCell = row.cells[3];
+            if (totalCell) {
+                totalCell.innerText = (qtyVal * priceVal).toFixed(2) + ' FCFA';
+            }
         });
-        computeTotals();
     }
     
     function getDocumentTitleAndSub() {
@@ -544,12 +624,15 @@ document.querySelectorAll('.item-price-input').forEach(inp => {
         
         let rowsHtml = "";
         items.forEach(item => {
-            const totalLine = ((item.quantity || 0) * (item.unitPrice || 0)).toFixed(2);
+            const qty = parseFloat(item.quantity) || 0;
+            const price = parseFloat(item.unitPrice) || 0;
+            const totalLine = (qty * price).toFixed(2);
+            const descriptionDisplay = item.description && item.description.trim() !== "" ? item.description : "—";
             rowsHtml += `
                 <tr>
-                    <td>${escapeHtml(item.description)}</td>
-                    <td class="right">${item.quantity || 0}</td>
-                    <td class="right">${(item.unitPrice || 0).toFixed(2)} FCFA</td>
+                    <td>${escapeHtml(descriptionDisplay)}</td>
+                    <td class="right">${qty}</td>
+                    <td class="right">${price.toFixed(2)} FCFA</td>
                     <td class="right">${totalLine} FCFA</td>
                 </tr>
             `;
@@ -573,7 +656,7 @@ document.querySelectorAll('.item-price-input').forEach(inp => {
                 </div>
                 <div class="doc-header" style="margin-top: 10px;">
                     <div><strong>N° ${escapeHtml(docNumber)}</strong><br>Date : ${escapeHtml(docDate)}</div>
-                    <div class="doc-infos"><strong>Client :</strong> ${escapeHtml(client)}${clientEmail ? `<br>Email & Tél : ${escapeHtml(clientEmail)}` : ''}</div>
+                    <div class="doc-infos"><strong>Client :</strong> ${escapeHtml(client)}${clientEmail ? `<br>Contact : ${escapeHtml(clientEmail)}` : ''}</div>
                 </div>
                 <div style="margin-bottom: 18px;">
                     <div style="white-space: pre-line; font-size:0.8rem;">${escapeHtml(clientAddr)}</div>
@@ -593,7 +676,7 @@ document.querySelectorAll('.item-price-input').forEach(inp => {
                 </div>
                 <div class="signature-area">
                     <span>Fait à Abidjan, le ${new Date().toLocaleDateString('fr-FR')}</span>
-                    <span>Signature client précèdée de la mention "Bon pour accord"</span>
+                    <span>Signature client précédée de la mention "Bon pour accord"</span>
                 </div>
             </div>
         `;
@@ -624,12 +707,15 @@ document.querySelectorAll('.item-price-input').forEach(inp => {
         
         let rowsHtml = "";
         items.forEach(item => {
-            const totalLine = ((item.quantity || 0) * (item.unitPrice || 0)).toFixed(2);
+            const qty = parseFloat(item.quantity) || 0;
+            const price = parseFloat(item.unitPrice) || 0;
+            const totalLine = (qty * price).toFixed(2);
+            const descriptionDisplay = item.description && item.description.trim() !== "" ? item.description : "—";
             rowsHtml += `
                 <tr>
-                    <td style="padding: 10px; border-bottom: 1px solid #ddd;">${escapeHtml(item.description)}</td>
-                    <td style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">${item.quantity || 0}</td>
-                    <td style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">${(item.unitPrice || 0).toFixed(2)} FCFA</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #ddd;">${escapeHtml(descriptionDisplay)}</td>
+                    <td style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">${qty}</td>
+                    <td style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">${price.toFixed(2)} FCFA</td>
                     <td style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">${totalLine} FCFA</td>
                 </tr>
             `;
@@ -654,208 +740,62 @@ document.querySelectorAll('.item-price-input').forEach(inp => {
                 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
                 <style>
                     * { margin: 0; padding: 0; box-sizing: border-box; }
-                    body { 
-                        font-family: 'Inter', sans-serif; 
-                        padding: 40px; 
-                        color: #1e293b;
-                        background: white;
-                    }
-                    .document-container {
-                        max-width: 1000px;
-                        margin: 0 auto;
-                    }
-                    .company-header {
-                        margin-bottom: 25px;
-                        padding-bottom: 15px;
-                        border-bottom: 3px solid #1e3c72;
-                    }
-                    .company-name {
-                        font-size: 1.3rem;
-                        font-weight: 800;
-                        color: #1e3c72;
-                    }
-                    .company-details {
-                        font-size: 0.7rem;
-                        color: #5b6e8c;
-                        margin-top: 5px;
-                        line-height: 1.4;
-                    }
-                    .doc-title-area {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: flex-start;
-                        margin-bottom: 20px;
-                    }
-                    .title {
-                        font-size: 2rem;
-                        font-weight: 800;
-                        color: #1e3c72;
-                    }
-                    .sub {
-                        font-size: 0.7rem;
-                        color: #5b6e8c;
-                    }
-                    .infos {
-                        text-align: right;
-                        font-size: 0.85rem;
-                    }
-                    .client-box {
-                        margin-bottom: 25px;
-                        padding: 12px;
-                        background: #f8fafc;
-                        border-radius: 8px;
-                    }
-                    .client-name {
-                        font-weight: 700;
-                        font-size: 1rem;
-                    }
-                    table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin: 20px 0;
-                    }
-                    th {
-                        background: #f1f5f9;
-                        padding: 12px;
-                        text-align: left;
-                        font-weight: 600;
-                        color: #1e3c72;
-                        border-bottom: 2px solid #e2e8f0;
-                    }
-                    td {
-                        padding: 10px;
-                        border-bottom: 1px solid #e2e8f0;
-                    }
-                    .right {
-                        text-align: right;
-                    }
-                    .totals {
-                        margin-top: 20px;
-                        padding-top: 20px;
-                        border-top: 2px solid #e2e8f0;
-                        text-align: right;
-                    }
-                    .total-line {
-                        margin: 6px 0;
-                        font-size: 0.9rem;
-                    }
-                    .grand-total {
-                        font-size: 1.3rem;
-                        font-weight: 800;
-                        color: #1e3c72;
-                        margin-top: 8px;
-                    }
-                    .notes {
-                        margin-top: 25px;
-                        padding: 12px;
-                        background: #f8fafc;
-                        border-radius: 8px;
-                        font-size: 0.8rem;
-                    }
-                    .signature {
-                        margin-top: 35px;
-                        padding-top: 15px;
-                        border-top: 1px dashed #cbd5e1;
-                        display: flex;
-                        justify-content: space-between;
-                        font-size: 0.7rem;
-                        color: #64748b;
-                    }
-                    .footer {
-                        margin-top: 30px;
-                        text-align: center;
-                        font-size: 0.65rem;
-                        color: #94a3b8;
-                    }
-                    @media print {
-                        body { padding: 0; }
-                        @page { size: A4; margin: 2cm; }
-                    }
+                    body { font-family: 'Inter', sans-serif; padding: 40px; color: #1e293b; background: white; }
+                    .document-container { max-width: 1000px; margin: 0 auto; }
+                    .company-header { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 3px solid #1e3c72; }
+                    .company-name { font-size: 1.3rem; font-weight: 800; color: #1e3c72; }
+                    .company-details { font-size: 0.7rem; color: #5b6e8c; margin-top: 5px; line-height: 1.4; }
+                    .doc-title-area { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+                    .title { font-size: 2rem; font-weight: 800; color: #1e3c72; }
+                    .sub { font-size: 0.7rem; color: #5b6e8c; }
+                    .infos { text-align: right; font-size: 0.85rem; }
+                    .client-box { margin-bottom: 25px; padding: 12px; background: #f8fafc; border-radius: 8px; }
+                    .client-name { font-weight: 700; font-size: 1rem; }
+                    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                    th { background: #f1f5f9; padding: 12px; text-align: left; font-weight: 600; border-bottom: 2px solid #e2e8f0; }
+                    td { padding: 10px; border-bottom: 1px solid #e2e8f0; }
+                    .right { text-align: right; }
+                    .totals { margin-top: 20px; padding-top: 20px; border-top: 2px solid #e2e8f0; text-align: right; }
+                    .total-line { margin: 6px 0; font-size: 0.9rem; }
+                    .grand-total { font-size: 1.3rem; font-weight: 800; color: #1e3c72; margin-top: 8px; }
+                    .notes { margin-top: 25px; padding: 12px; background: #f8fafc; border-radius: 8px; font-size: 0.8rem; }
+                    .signature { margin-top: 35px; padding-top: 15px; border-top: 1px dashed #cbd5e1; display: flex; justify-content: space-between; font-size: 0.7rem; }
+                    .footer { margin-top: 30px; text-align: center; font-size: 0.65rem; color: #94a3b8; }
                 </style>
             </head>
-           
-
-
-
+            <body>
                 <div class="document-container">
                     <div class="company-header">
                         <div class="company-name">${escapeHtml(companyInfo.name)}</div>
-                        <div class="company-details">
-                            ${escapeHtml(companyInfo.address)}<br>
-                            Tel: ${escapeHtml(companyInfo.phone)} | Email: ${escapeHtml(companyInfo.email)}<br>
-                            RC: ${escapeHtml(companyInfo.rc)} | CC: ${escapeHtml(companyInfo.cc)} | N°CTA: ${escapeHtml(companyInfo.cta)} | Capital: ${escapeHtml(companyInfo.capital)}
-                        </div>
+                        <div class="company-details">${escapeHtml(companyInfo.address)}<br>Tel: ${escapeHtml(companyInfo.phone)} | Email: ${escapeHtml(companyInfo.email)}<br>RC: ${escapeHtml(companyInfo.rc)} | CC: ${escapeHtml(companyInfo.cc)} | N°CTA: ${escapeHtml(companyInfo.cta)} | Capital: ${escapeHtml(companyInfo.capital)}</div>
                     </div>
-                    
                     <div class="doc-title-area">
-                        <div>
-                            <div class="title">${title}</div>
-                            <div class="sub">${sub}</div>
-                        </div>
-                        <div class="infos">
-                            <strong>N° ${escapeHtml(docNumber)}</strong><br>
-                            Date : ${escapeHtml(docDate)}
-                        </div>
+                        <div><div class="title">${title}</div><div class="sub">${sub}</div></div>
+                        <div class="infos"><strong>N° ${escapeHtml(docNumber)}</strong><br>Date : ${escapeHtml(docDate)}</div>
                     </div>
-                    
-                    <div class="client-box">
-                        <div class="client-name">${escapeHtml(client)}</div>
-                        ${clientEmail ? `<div>${escapeHtml(clientEmail)}</div>` : ''}
-                        ${clientAddr ? `<div style="margin-top: 5px;">${escapeHtml(clientAddr)}</div>` : ''}
-                    </div>
-                    
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Désignation</th>
-                                <th class="right">Qté</th>
-                                <th class="right">Prix unit.</th>
-                                <th class="right">Total HT</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${rowsHtml}
-                       
-
-                    </table>
-                    
-                    <div class="totals">
-                        <div class="total-line">Total HT : ${totalHT.toFixed(2)} FCFA</div>
-                        ${discountRate > 0 ? `<div class="total-line">Remise (${discountRate}%) : - ${discountAmount.toFixed(2)} FCFA</div>` : ''}
-                        <div class="total-line">TVA (${taxRate}%) : ${vatAmount.toFixed(2)} FCFA</div>
-                        <div class="grand-total">TOTAL TTC : ${totalTTC.toFixed(2)} FCFA</div>
-                    </div>
-                    
-                    ${notes ? `<div class="notes"><strong>Notes & conditions :</strong><br>${escapeHtml(notes)}</div>` : ''}
-                    
-                    <div class="signature">
-                        <span>Fait à Abidjan, le ${new Date().toLocaleDateString('fr-FR')}</span>
-                        <span>Signature client précèdée de la mention "Bon pour accord"</span>
-                    </div>
-                    
-                    <div class="footer">
-                        ${currentDocType === "devis" ? "Devis établi électroniquement - Valable 30 jours" : 
-                          (currentDocType === "proforma" ? "Facture Proforma - Sans valeur de facture définitive" : 
-                          "Facture définitive - Merci de votre règlement")}<br>
-                        ${companyInfo.name} - Tous droits réservés
-                    </div>
+                    <div class="client-box"><div class="client-name">${escapeHtml(client)}</div>${clientEmail ? `<div>${escapeHtml(clientEmail)}</div>` : ''}${clientAddr ? `<div style="margin-top: 5px;">${escapeHtml(clientAddr)}</div>` : ''}</div>
+                    <table><thead><tr><th>Désignation</th><th class="right">Qté</th><th class="right">Prix unit.</th><th class="right">Total HT</th></tr></thead><tbody>${rowsHtml}</tbody></table>
+                    <div class="totals"><div class="total-line">Total HT : ${totalHT.toFixed(2)} FCFA</div>${discountRate > 0 ? `<div class="total-line">Remise (${discountRate}%) : - ${discountAmount.toFixed(2)} FCFA</div>` : ''}<div class="total-line">TVA (${taxRate}%) : ${vatAmount.toFixed(2)} FCFA</div><div class="grand-total">TOTAL TTC : ${totalTTC.toFixed(2)} FCFA</div></div>
+                    ${notes ? `<div class="notes"><strong>Notes :</strong><br>${escapeHtml(notes)}</div>` : ''}
+                    <div class="signature"><span>Fait à Abidjan, le ${new Date().toLocaleDateString('fr-FR')}</span><span>Signature client précédée de "Bon pour accord"</span></div>
+                    <div class="footer">${currentDocType === "devis" ? "Devis valable 30 jours" : (currentDocType === "proforma" ? "Facture Proforma" : "Facture définitive")}<br>${companyInfo.name}</div>
                 </div>
-            
+            </body>
+            </html>
         `);
         doc.close();
-        
-        setTimeout(() => {
-            iframe.contentWindow.print();
-            setTimeout(() => {
-                document.body.removeChild(iframe);
-            }, 1000);
-        }, 500);
+        setTimeout(() => { iframe.contentWindow.print(); setTimeout(() => { if (document.body.contains(iframe)) document.body.removeChild(iframe); }, 1000); }, 500);
     }
     
-    function refreshAll() {
-        renderItemsTable();
-        updatePreview();
-        computeTotals();
+    function addNewEmptyLine() {
+        // Ajouter une ligne avec description VIDE, quantité = 1, prix = 0
+        items.push({ description: "", quantity: 1, unitPrice: 0 });
+        refreshAll();
+        // focus automatique sur le nouveau champ description
+        setTimeout(() => {
+            const lastRowInput = document.querySelector('#itemsBody tr:last-child .item-desc-input');
+            if (lastRowInput) lastRowInput.focus();
+        }, 50);
     }
     
     function setDocType(type) {
@@ -864,28 +804,19 @@ document.querySelectorAll('.item-price-input').forEach(inp => {
         if (type === "devis") prefix = "DEV-";
         else if (type === "proforma") prefix = "PRO-";
         else prefix = "FAC-";
-        
-        const currentVal = docNumberInput.value;
-        if (!currentVal.startsWith(prefix) && currentVal.length < 10) {
+        let currentVal = docNumberInput.value;
+        if (!currentVal.startsWith(prefix) && currentVal.length < 15) {
             docNumberInput.value = prefix + currentVal.replace(/^(DEV-|PRO-|FAC-)/, '');
         }
         updatePreview();
     }
     
-    function addItem() {
-        items.push({ description: "Nouvelle prestation", quantity: 1, unitPrice: 0 });
-        refreshAll();
-    }
-    
     function resetForm() {
-        items = [
-            { description: "Prestation de conseil import/export", quantity: 1, unitPrice: 500000 },
-            { description: "Frais de douane et dédouanement", quantity: 1, unitPrice: 250000 }
-        ];
+        items = [];   // Vide pour permettre saisie libre
         docNumberInput.value = "DEV-001";
         const today = new Date().toISOString().slice(0,10);
         docDateInput.value = today;
-        clientNameInput.value = "NOVA Startup TECH CI"; 
+        clientNameInput.value = "NOVA Startup TECH CI";
         clientEmailInput.value = "nstci2025@gmail.com";
         clientAddressInput.value = "Korhogo/Abidjan CI";
         notesField.value = "Paiement à réception - Merci de votre confiance";
@@ -894,17 +825,19 @@ document.querySelectorAll('.item-price-input').forEach(inp => {
         currentDocType = "devis";
         refreshAll();
         setDocType("devis");
+        // Ajouter une ligne vide pour une saisie immédiate
+        addNewEmptyLine();
     }
     
-    document.getElementById('addItemBtn').addEventListener('click', addItem);
+    document.getElementById('addItemBtn').addEventListener('click', addNewEmptyLine);
     document.getElementById('createQuoteBtn').addEventListener('click', () => setDocType('devis'));
     document.getElementById('createProformaBtn').addEventListener('click', () => setDocType('proforma'));
     document.getElementById('createInvoiceBtn').addEventListener('click', () => setDocType('invoice'));
     document.getElementById('resetFormBtn').addEventListener('click', resetForm);
     document.getElementById('generatePdfBtn').addEventListener('click', generatePDF);
     
-    taxRateInput.addEventListener('input', refreshAll);
-    discountRateInput.addEventListener('input', refreshAll);
+    taxRateInput.addEventListener('input', () => { computeTotals(); updatePreview(); });
+    discountRateInput.addEventListener('input', () => { computeTotals(); updatePreview(); });
     docNumberInput.addEventListener('input', updatePreview);
     docDateInput.addEventListener('input', updatePreview);
     clientNameInput.addEventListener('input', updatePreview);
@@ -913,6 +846,8 @@ document.querySelectorAll('.item-price-input').forEach(inp => {
     notesField.addEventListener('input', updatePreview);
     
     setDefaultDate();
+    // Initialisation : départ avec une ligne vide pour que l'utilisateur saisisse directement
+    items = [{ description: "", quantity: 1, unitPrice: 0 }];
     refreshAll();
     setDocType('devis');
 </script>
